@@ -1,13 +1,15 @@
 
+
+
+
+
+# HUAP Core
+
 <p align="center">
   <img src="HUAP-LOGO.png" alt="HUAP-Logo" width="500"/>
   <br/>
   <strong>HUman Agentic Platform</strong>
 </p>
-
-
-
-# HUAP Core
 
 **Build deterministic, traceable AI agents with replay and evaluation.**
 
