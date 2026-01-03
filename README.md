@@ -152,10 +152,9 @@ See `examples/pods/` for reference implementations:
 
 ---
 
-## 🗺️ Next Steps (Public HUAP Roadmap)
+## 🗺️ Next Steps
 
-Everything below is **public-core friendly** (i.e., not “Pro” features like auth, multi-tenant routing, secret vaults, etc.).
-These are the biggest adoption multipliers:
+
 
 ### 🔌 1) Adapter layer for popular agent frameworks
 Goal: let people keep their existing framework but get HUAP’s trace/replay/diff/eval.
