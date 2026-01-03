@@ -6,7 +6,7 @@
 # HUAP Core
 
 <p align="center">
-  <img src="HUAP-logo.png" alt="HUAP-Logo" width="500"/>
+  <img src="HUAP-logo.png" alt="HUAP-Logo" width="700"/>
   <br/>
   <strong>HUman Agentic Platform</strong>
 </p>
