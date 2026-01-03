@@ -1,136 +1,120 @@
 
 
 
-
-
-# HUAP Core
+# HUAP Core 🧠⚙️
 
 <p align="center">
   <img src="HUAP-logo.png" alt="HUAP-Logo" width="700"/>
   <br/>
   <strong>HUman Agentic Platform</strong>
+  <br/>
+  <em>Trace-first primitives for deterministic, testable agents</em>
 </p>
 
-**Build deterministic, traceable AI agents with replay and evaluation.**
+**Build deterministic, traceable AI agents with replay, diff, and evaluation.**
 
 HUAP Core provides the foundational toolkit for building AI agent systems that are:
-- **Traceable** - Every action recorded as replayable events
-- **Deterministic** - Stub mode for reproducible testing
-- **Evaluatable** - Built-in cost and quality grading
+
+- 🧾 **Traceable** — every action recorded as replayable events  
+- 🔁 **Deterministic** — stub mode + replay verification for reproducible testing  
+- 🧪 **Evaluatable** — cost/quality grading to gate regressions in CI  
 
 ---
 
-## Quick Start
+## 🚀 Quick Start (PyPI)
 
 ```bash
-# Install
 pip install huap-core
 
-# Create a pod
-huap pod create myagent
+# Create a pod (generates hu-<name>/hu_<name>/<name>.yaml)
+huap pod create hello --description "My first agent"
 
 # Run with tracing (stub mode - no API key needed)
 export HUAP_LLM_MODE=stub
-huap trace run myagent graphs/myagent.yaml --out traces/myagent.jsonl
+huap trace run hello hu-hello/hu_hello/hello.yaml --out traces/hello.jsonl
 
-# Replay (deterministic)
-huap trace replay traces/myagent.jsonl --verify
+# Replay (deterministic verification)
+huap trace replay traces/hello.jsonl --mode exec --verify
 
-# Evaluate
-huap eval trace traces/myagent.jsonl
+# Evaluate (budgets/grades)
+huap eval trace traces/hello.jsonl
 ```
 
 ---
 
-## Golden Path (5 Minutes)
+## 🧭 Golden Path (5 Minutes)
 
-### 1. Install
-
-```bash
-pip install huap-core
-```
-
-### 2. Create Your First Pod
-
+### 1) Create a pod
 ```bash
 huap pod create hello --description "My first agent"
 ```
 
-### 3. Run with Tracing
-
+### 2) Run with tracing (stub mode)
 ```bash
-# Use stub mode (no API key needed)
 export HUAP_LLM_MODE=stub
-
-huap trace run hello default --out traces/hello.jsonl
+huap trace run hello hu-hello/hu_hello/hello.yaml --out traces/hello.jsonl
 ```
 
-### 4. View the Trace
-
+### 3) View the trace
 ```bash
 huap trace view traces/hello.jsonl
 ```
 
-### 5. Replay & Verify
-
+### 4) Replay & verify (deterministic)
 ```bash
-huap trace replay traces/hello.jsonl --verify
+huap trace replay traces/hello.jsonl --mode exec --verify
 ```
 
-### 6. Diff Two Runs
-
+### 5) Diff two runs (detect drift)
 ```bash
-# Run again
-huap trace run hello default --out traces/hello_v2.jsonl
-
-# Compare
+huap trace run hello hu-hello/hu_hello/hello.yaml --out traces/hello_v2.jsonl
 huap trace diff traces/hello.jsonl traces/hello_v2.jsonl
 ```
 
 ---
 
-## Key Concepts
+## 🧩 Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Pod** | A self-contained agent with tools and workflows |
-| **Trace** | JSONL log of all events during a run |
-| **Replay** | Re-execute a trace with stubbed dependencies |
-| **Diff** | Compare two traces for regressions |
-| **Eval** | Grade a trace on cost and quality |
+| Concept | Meaning |
+|---|---|
+| **Pod** | A self-contained agent: tools + workflows |
+| **Trace** | JSONL event stream of the full run |
+| **Replay** | Re-run deterministically using recorded events (or stubs) |
+| **Diff** | Compare two traces for behavioral/cost regressions |
+| **Eval** | Grade a trace against budgets/constraints |
 
 ---
 
-## CLI Reference
+## 🛠 CLI Reference
 
 ```bash
 huap pod create <name>      # Create a new pod from template
 huap pod validate <name>    # Validate pod contract
 huap pod list               # List configured pods
 
-huap trace run <pod> <graph>   # Run and record trace
-huap trace view <file>         # View trace events
-huap trace replay <file>       # Replay with stubs
-huap trace diff <a> <b>        # Compare traces
+huap trace run <pod> <graph>     # Run and record trace (graph is a YAML path)
+huap trace view <file>           # View trace events
+huap trace replay <file>         # Replay with stubs
+huap trace diff <a> <b>          # Compare traces
 
-huap eval trace <file>      # Evaluate single trace
-huap eval run <suite>       # Evaluate suite of traces
-huap eval init              # Create budget config
+huap eval trace <file>           # Evaluate single trace
+huap eval run <suite>            # Evaluate suite of traces
+huap eval init                   # Create budget config
 ```
 
 ---
 
-## Environment Variables
+## 🔐 Environment Variables
 
 | Variable | Description | Default |
-|----------|-------------|---------|
+|---|---|---|
 | `OPENAI_API_KEY` | OpenAI API key | Required (live mode) |
 | `HUAP_LLM_MODE` | Set to `stub` for testing | Live |
 | `HUAP_TRACE_REDACT_LLM` | Redact LLM content | `false` |
 
 ---
 
-## Repository Layout
+## 🗂 Repository Layout
 
 ```
 huap-core/
@@ -148,29 +132,98 @@ huap-core/
 
 ---
 
-## Example Pods
+## 🧪 Example Pods
 
-See `/examples/pods/` for reference implementations:
+See `examples/pods/` for reference implementations:
 
-- **hello-pod** - Minimal deterministic tools (echo, add, normalize)
-- **llm-pod** - LLM integration with stub mode (summarize, classify)
-- **memory-pod** - State management patterns (get, put, list)
-
----
-
-## Documentation
-
-- [Getting Started](GETTING_STARTED.md) - Full tutorial
-- [Concepts](CONCEPTS.md) - Core architecture
-- [Pod Authoring](POD_AUTHORING.md) - Building pods
-- [Trace Guide](TRACE_GUIDE.md) - Trace format & replay
-- [Contributing](CONTRIBUTING.md) - How to contribute
+- 👋 **hello-pod** — minimal deterministic tools (echo, add, normalize)  
+- 🧠 **llm-pod** — LLM integration with stub mode (summarize, classify)  
+- 🗃️ **memory-pod** — state management patterns (get, put, list)  
 
 ---
 
-## License
+## 📚 Documentation
 
-MIT License - See [LICENSE](LICENSE)
+- [Getting Started](GETTING_STARTED.md) — full tutorial
+- [Concepts](CONCEPTS.md) — core architecture
+- [Pod Authoring](POD_AUTHORING.md) — building pods
+- [Trace Guide](TRACE_GUIDE.md) — trace format & replay
+- [Contributing](CONTRIBUTING.md) — how to contribute
+
+---
+
+## 🗺️ Next Steps (Public HUAP Roadmap)
+
+Everything below is **public-core friendly** (i.e., not “Pro” features like auth, multi-tenant routing, secret vaults, etc.).
+These are the biggest adoption multipliers:
+
+### 🔌 1) Adapter layer for popular agent frameworks
+Goal: let people keep their existing framework but get HUAP’s trace/replay/diff/eval.
+
+- **CrewAI adapter**: wrap CrewAI agent runs into HUAP traces  
+- **LangChain adapter**: instrument chains/tools as HUAP events  
+- **LlamaIndex adapter**: capture retrieval + synthesis steps as trace nodes  
+- **AutoGen / Semantic Kernel adapters**: map multi-agent turns to trace spans  
+
+Suggested shape:
+- `packages/hu-adapters/huap_crewai/`
+- `packages/hu-adapters/huap_langchain/`
+- common interface: `Adapter.run(...) -> trace.jsonl`
+
+### 🧾 2) Formalize the trace schema
+- JSONSchema for events (versioned)
+- canonical “event types” registry
+- backwards compatibility rules (so old traces keep replaying)
+
+### 🧪 3) More evaluation suites & golden traces
+- curated “smoke” suite for CI
+- example “budget packs” for common use cases (offline, cheap, fast, etc.)
+- golden baselines in `examples/traces/` (small + deterministic)
+
+### 🔭 4) Better trace UX (still open-source)
+- richer `huap trace view` summaries
+- optional HTML report output for `trace diff` / `eval`
+- lightweight local UI to browse traces (even a static viewer)
+
+### 🧰 5) More batteries-included tools (safe by default)
+- HTTP tool with allowlist + rate limits
+- filesystem tool with sandbox root
+- structured redaction helpers
+
+If you want to work on one of these, open an issue with the prefix **[RFC]**, **[Adapter]**, **[Trace]**, or **[Eval]**.
+
+---
+
+## 🤝 Contributing
+
+We want contributors.
+
+### Ways to contribute
+- 🐛 bug fixes and test coverage
+- 🔌 framework adapters (CrewAI / LangChain / etc.)
+- 🧾 trace schema + compatibility tooling
+- 🧪 evaluation suites + golden baselines
+- 📝 docs and runnable examples
+
+### Dev setup
+```bash
+# From repo root
+pip install -e packages/hu-core[dev]
+
+pytest -q
+ruff check .
+```
+
+### PR hygiene (what makes reviews fast)
+- keep changes small and well-scoped
+- add/adjust a test or golden trace when behavior changes
+- include a short note on replay/eval impact (tokens/tool calls)
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE)
 
 ---
 
