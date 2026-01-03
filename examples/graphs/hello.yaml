@@ -1,0 +1,12 @@
+# Echo Pod Graph - Minimal example for testing
+# This graph has two nodes: tool call and LLM greeting
+
+nodes:
+  - name: echo_tool
+    run: examples.pods.echo_pod.nodes.echo_tool
+  - name: echo_greet
+    run: examples.pods.echo_pod.nodes.echo_greet
+
+edges:
+  echo_tool: echo_greet
+  echo_greet: null

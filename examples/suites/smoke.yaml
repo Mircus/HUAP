@@ -1,0 +1,66 @@
+# Smoke Test Suite
+# Version: 0.1
+#
+# Minimal test suite to verify the trace/replay/eval pipeline works.
+# Use with: huap eval run examples/suites/smoke.yaml
+
+name: smoke
+version: "0.1"
+description: "Smoke tests for HUAP trace/replay/eval pipeline"
+
+# Budget configuration
+budgets: examples/budgets/dev.yaml
+
+# Evaluation settings
+eval:
+  # Require exact match on critical fields
+  strict_fields:
+    - run_id
+    - pod
+    - status
+
+  # Allow variance on timing fields
+  ignore_fields:
+    - ts
+    - duration_ms
+
+  # Semantic diff configuration
+  diff:
+    error_regression: fail    # New errors = fail
+    policy_regression: fail   # New policy violations = fail
+    cost_regression: warn     # Cost increase = warn
+    output_mismatch: warn     # Output differences = warn
+
+# Test scenarios
+scenarios:
+  - name: echo_hello
+    description: "Basic echo workflow"
+    pod: echo
+    graph: examples/graphs/hello.yaml
+    golden_trace: examples/traces/golden_hello.jsonl
+    input:
+      message: "Hello, World!"
+    expected_output:
+      echoed: "Hello, World!"
+    # Don't compare LLM output exactly (non-deterministic)
+    ignore_output_fields:
+      - greeting
+
+  - name: echo_empty
+    description: "Echo with empty message"
+    pod: echo
+    graph: examples/graphs/hello.yaml
+    input:
+      message: ""
+    expected_status: success
+
+# Pass criteria
+pass_criteria:
+  # All scenarios must pass
+  all_pass: true
+
+  # Budget must be met
+  budget_grade_min: C
+
+  # No regressions allowed
+  allow_regressions: false

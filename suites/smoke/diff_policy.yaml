@@ -1,0 +1,26 @@
+# Diff Policy for Smoke Suite
+# Defines thresholds for regression detection
+
+# Cost thresholds (percentage increase)
+token_increase_warn_pct: 20.0    # >20% token increase = WARN
+token_increase_fail_pct: 50.0    # >50% token increase = FAIL
+usd_increase_warn_pct: 20.0
+usd_increase_fail_pct: 50.0
+latency_increase_warn_pct: 50.0
+latency_increase_fail_pct: 100.0
+
+# Fields to ignore in comparisons
+ignore_fields:
+  - timestamp
+  - run_id
+  - span_id
+  - parent_span_id
+  - duration_ms
+
+# Event types where removal is only INFO (not FAIL)
+removals_info_only:
+  - quality_record
+  - cost_record
+
+# Behavior settings
+allow_new_errors: false

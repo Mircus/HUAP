@@ -1,0 +1,25 @@
+# Hello Workflow - Minimal runnable example
+# Run with: huap trace run hello examples/graphs/hello_workflow.yaml
+
+name: hello_workflow
+version: "0.1.0"
+description: "A minimal workflow that echoes and greets"
+
+nodes:
+  - name: start
+    run: hu_core.examples.nodes.echo_node
+    description: "Echo the input message"
+
+  - name: greet
+    run: hu_core.examples.nodes.greet_node
+    description: "Generate a greeting"
+
+  - name: end
+    run: hu_core.examples.nodes.end_node
+    description: "End the workflow"
+
+edges:
+  - from: start
+    to: greet
+  - from: greet
+    to: end

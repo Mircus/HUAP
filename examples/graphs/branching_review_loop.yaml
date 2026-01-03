@@ -1,0 +1,141 @@
+# Branching Review Loop Graph
+# Demonstrates conditional branching and review patterns
+
+name: branching_review_loop
+version: "0.1.0"
+description: "A workflow with conditional branching and review loops"
+
+# Entry point
+entry: start
+
+# Nodes
+nodes:
+  start:
+    type: entry
+    description: "Initialize with task type"
+    next: classify
+
+  classify:
+    type: action
+    description: "Classify the task"
+    action: classify_task
+    input:
+      content: "${input.content}"
+    next: branch_on_type
+
+  branch_on_type:
+    type: branch
+    description: "Route based on task type"
+    condition: "${state.task_type}"
+    branches:
+      simple: process_simple
+      complex: process_complex
+      review: needs_review
+    default: process_simple
+
+  process_simple:
+    type: action
+    description: "Quick processing for simple tasks"
+    action: quick_process
+    input:
+      content: "${state.content}"
+    next: complete
+
+  process_complex:
+    type: action
+    description: "Detailed processing for complex tasks"
+    action: detailed_process
+    input:
+      content: "${state.content}"
+      depth: 3
+    next: quality_check
+
+  needs_review:
+    type: action
+    description: "Flag for human review"
+    action: flag_for_review
+    input:
+      content: "${state.content}"
+      reason: "${state.review_reason}"
+    next: wait_for_review
+
+  wait_for_review:
+    type: wait
+    description: "Wait for human input"
+    timeout_seconds: 3600
+    next: review_decision
+
+  review_decision:
+    type: branch
+    description: "Check review outcome"
+    condition: "${state.review_approved}"
+    branches:
+      true: process_complex
+      false: reject
+    default: reject
+
+  quality_check:
+    type: action
+    description: "Check output quality"
+    action: check_quality
+    input:
+      output: "${state.processed}"
+      threshold: 0.8
+    next: quality_branch
+
+  quality_branch:
+    type: branch
+    description: "Route based on quality score"
+    condition: "${state.quality_passed}"
+    branches:
+      true: complete
+      false: needs_revision
+    default: needs_revision
+
+  needs_revision:
+    type: action
+    description: "Revise based on feedback"
+    action: revise_output
+    input:
+      output: "${state.processed}"
+      feedback: "${state.quality_feedback}"
+    next: revision_count_check
+
+  revision_count_check:
+    type: branch
+    description: "Check revision limit"
+    condition: "${state.revision_count < 3}"
+    branches:
+      true: quality_check
+      false: escalate
+    default: escalate
+
+  escalate:
+    type: action
+    description: "Escalate to human after max revisions"
+    action: escalate_to_human
+    input:
+      content: "${state.content}"
+      revisions: "${state.revision_count}"
+    next: complete
+
+  reject:
+    type: exit
+    description: "Task rejected"
+    output:
+      status: "rejected"
+      reason: "${state.rejection_reason}"
+
+  complete:
+    type: exit
+    description: "Complete the workflow"
+    output:
+      result: "${state.processed}"
+      status: "success"
+      path: "${state.execution_path}"
+
+# Workflow metadata
+metadata:
+  author: "HUAP Examples"
+  tags: ["example", "branching", "review", "loop", "intermediate"]
+  max_revisions: 3

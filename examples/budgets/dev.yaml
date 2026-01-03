@@ -1,0 +1,34 @@
+# Development Budget Configuration
+# Version: 0.1
+#
+# Lenient budget for local development and testing.
+# Use with: huap eval run <suite> --budgets examples/budgets/dev.yaml
+
+name: dev
+version: "0.1"
+
+# Cost Budget - Generous for dev
+cost:
+  tokens_max: 100000
+  usd_max: 1.00
+  latency_p95_ms: 30000
+
+# Quality Budget - Relaxed for dev
+quality:
+  policy_violations_max: 0
+  tool_errors_max: 2
+  min_quality_score: 0.7
+
+  required_metrics:
+    json_valid: 0.9
+
+  preferred_metrics:
+    critique_closed: 0.8
+
+# Scenario Overrides
+scenarios:
+  echo_test:
+    cost:
+      tokens_max: 5000
+      usd_max: 0.05
+      latency_p95_ms: 5000

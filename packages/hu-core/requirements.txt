@@ -1,0 +1,4 @@
+sqlalchemy==2.0.20
+pydantic==2.5.0
+alembic==1.13.0
+prometheus-client==0.20.0

@@ -1,0 +1,44 @@
+# Sequential Graph Example
+# Demonstrates a simple linear workflow
+
+name: sequential
+version: "0.1.0"
+description: "A simple sequential workflow"
+
+# Entry point
+entry: start
+
+# Nodes
+nodes:
+  start:
+    type: entry
+    description: "Initialize the workflow"
+    next: process
+
+  process:
+    type: action
+    description: "Process the input data"
+    action: process_input
+    input:
+      message: "${input.message}"
+    next: transform
+
+  transform:
+    type: action
+    description: "Transform the processed data"
+    action: normalize_text
+    input:
+      text: "${state.message}"
+    next: complete
+
+  complete:
+    type: exit
+    description: "Complete the workflow"
+    output:
+      result: "${state.normalized}"
+      status: "success"
+
+# Workflow metadata
+metadata:
+  author: "HUAP Examples"
+  tags: ["example", "sequential", "beginner"]

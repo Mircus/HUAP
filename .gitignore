@@ -1,0 +1,81 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+.env.production
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+huap.db
+
+# Logs
+*.log
+logs/
+
+# Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Azure & Deployment
+.terraform/
+*.tfstate*
+*.tfvars
+
+# Node (if needed)
+node_modules/
+npm-debug.log
+
+# HUAP Trace Artifacts
+traces/
+runs/
+.huap/
+trace_diff.md
+trace_diff.json
+
+# Keep golden traces (override above)
+!examples/traces/
+
+# Misc
+.env.*.swp
+.claude/
