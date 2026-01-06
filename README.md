@@ -148,6 +148,7 @@ See `examples/pods/` for reference implementations:
 - [Concepts](CONCEPTS.md) — core architecture
 - [Pod Authoring](POD_AUTHORING.md) — building pods
 - [Trace Guide](TRACE_GUIDE.md) — trace format & replay
+- [Conformance](CONFORMANCE.md) — interface & schema contracts
 - [Contributing](CONTRIBUTING.md) — how to contribute
 
 ---
