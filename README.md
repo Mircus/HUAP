@@ -1,8 +1,4 @@
 
-
-
-
-
 <p align="center">
   <img src="HUAP-logo.png" alt="HUAP-Logo" width="700"/>
   <br/>
