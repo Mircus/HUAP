@@ -104,7 +104,7 @@ Total events: 8
 Replay re-emits the same trace events:
 
 ```bash
-huap trace replay examples/traces/golden_hello.jsonl --verify
+huap trace replay examples/traces/golden_hello.jsonl --mode exec --verify
 ```
 
 Output:
@@ -115,32 +115,26 @@ Verification: PASSED (state hashes match)
 
 ---
 
-## Step 5: Add a Tool to Your Pod
+## Step 5: Add a Node to Your Workflow
 
-Edit `hu_myagent/pod.py`:
+Add a node function to `hu_myagent/pod.py`:
 
 ```python
-from hu_core.tools import BaseTool, ToolResult, ToolStatus, ToolCategory
+from typing import Any, Dict
 
-class GreetTool(BaseTool):
-    name = "greet"
-    description = "Greet a user by name"
-    category = ToolCategory.UTILITY
+def greet_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Greet a user by name."""
+    name = state.get("name", "World")
+    return {"greeting": f"Hello, {name}!"}
+```
 
-    input_schema = {
-        "type": "object",
-        "properties": {
-            "name": {"type": "string"},
-        },
-        "required": ["name"],
-    }
+Then reference it in your workflow YAML:
 
-    async def execute(self, input_data, context=None):
-        name = input_data.get("name", "World")
-        return ToolResult(
-            status=ToolStatus.SUCCESS,
-            data={"greeting": f"Hello, {name}!"},
-        )
+```yaml
+nodes:
+  - name: greet
+    run: hu_myagent.pod.greet_node
+    description: "Greet the user"
 ```
 
 ---
@@ -198,8 +192,9 @@ Add to `.github/workflows/ci.yml`:
 - name: Run smoke tests
   run: |
     export HUAP_LLM_MODE=stub
-    huap trace replay suites/smoke/baseline.jsonl --verify
-    huap eval trace suites/smoke/baseline.jsonl
+    huap trace run hello examples/graphs/hello.yaml --out /tmp/smoke.jsonl
+    huap trace replay /tmp/smoke.jsonl --mode exec --verify
+    huap eval trace /tmp/smoke.jsonl
 ```
 
 ---

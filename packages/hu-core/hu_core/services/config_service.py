@@ -33,8 +33,11 @@ def load_config(path: str | Path | None = None) -> Dict[str, Any]:
     resolved = Path(path).expanduser() if path else _default_config_path()
     key = str(resolved.resolve())
     if key not in _CONFIG_CACHE:
-        with open(resolved, "r", encoding="utf-8") as f:
-            _CONFIG_CACHE[key] = yaml.safe_load(f) or {}
+        if not resolved.exists():
+            _CONFIG_CACHE[key] = {}
+        else:
+            with open(resolved, "r", encoding="utf-8") as f:
+                _CONFIG_CACHE[key] = yaml.safe_load(f) or {}
     return _CONFIG_CACHE[key]
 
 

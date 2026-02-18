@@ -57,7 +57,7 @@ class KVStore(ABC):
 
 ---
 
-## 2. Trace Schema (v1.0)
+## 2. Trace Schema (v0.1)
 
 Every trace event must contain:
 

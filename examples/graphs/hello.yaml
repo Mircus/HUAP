@@ -8,5 +8,7 @@ nodes:
     run: examples.pods.echo_pod.nodes.echo_greet
 
 edges:
-  echo_tool: echo_greet
-  echo_greet: null
+  - from: echo_tool
+    to: echo_greet
+  - from: echo_greet
+    to: null

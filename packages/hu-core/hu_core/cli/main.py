@@ -90,6 +90,23 @@ class {class_name}Pod(PodContract):
             "latest_session": sessions[-1].get("session_start") if sessions else None,
         }}
 
+
+# ── Node functions referenced by WORKFLOW_TEMPLATE ──────────────────────
+
+def start_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Initialize the workflow."""
+    return {{"status": "started"}}
+
+
+def process_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Process input data."""
+    return {{"status": "processed"}}
+
+
+def end_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Finalize the workflow."""
+    return {{"status": "completed"}}
+
     def get_system_prompt(self) -> str:
         """Return the system prompt for single-pod AI analysis."""
         return (
@@ -149,7 +166,7 @@ version = "0.1.0"
 description = "{description}"
 requires-python = ">=3.10"
 dependencies = [
-    "hu-core",
+    "huap-core>=0.1.0b1",
 ]
 '''
 
@@ -590,8 +607,7 @@ if HAS_CLICK:
         click.echo("\nNext steps:")
         click.echo(f"  1. Edit {package_dir / 'pod.py'} to customize your pod")
         click.echo(f"  2. Edit {package_dir / f'{name}.yaml'} to define your workflow")
-        click.echo(f"  3. Add your pod to config.yaml")
-        click.echo(f"  4. Run: huap pod validate {name}")
+        click.echo(f"  3. Run: huap pod validate {name}")
 
     @pod.command("validate")
     @click.argument("name")
@@ -605,9 +621,9 @@ if HAS_CLICK:
         NAME: Pod name to validate
 
         Examples:
-            huap pod validate soma
-            huap pod validate soma --trace traces/soma.jsonl
-            huap pod validate soma --format markdown
+            huap pod validate hello
+            huap pod validate hello --trace traces/hello.jsonl
+            huap pod validate hello --format markdown
         """
         name = name.lower().replace("-", "_")
 
@@ -698,9 +714,30 @@ if HAS_CLICK:
                     break
 
         if not config_path.exists():
-            click.echo(f"Config file not found: {config_path}", err=True)
-            click.echo("Use --config to specify the config file path")
-            sys.exit(1)
+            # Try to discover pods by scanning for pod directories
+            cwd = Path.cwd()
+            packages_dir = cwd / "packages"
+            pods_dir = cwd / "pods"
+
+            discovered = []
+            for scan_dir in [packages_dir, pods_dir]:
+                if scan_dir.exists():
+                    for child in sorted(scan_dir.iterdir()):
+                        if child.is_dir() and child.name.startswith("hu-"):
+                            pod_name = child.name[3:]  # strip "hu-"
+                            discovered.append((pod_name, child))
+
+            if discovered:
+                click.echo(f"Discovered pods ({len(discovered)}):\n")
+                for pod_name, pod_path in discovered:
+                    click.echo(f"  {pod_name}")
+                    click.echo(f"    Path: {pod_path}")
+                    click.echo()
+            else:
+                click.echo("No pods found.")
+                click.echo("Create one with: huap pod create <name>")
+                click.echo("Or initialize a workspace: huap init <name>")
+            return
 
         # Parse YAML
         try:
@@ -770,7 +807,7 @@ if HAS_CLICK:
 
             if not examples_src.exists():
                 click.echo("Error: Could not find examples directory.", err=True)
-                click.echo("Examples are available at: https://github.com/huap-ai/huap-core/tree/main/examples", err=True)
+                click.echo("Examples are available at: https://github.com/Mircus/HUAP/tree/main/examples", err=True)
                 sys.exit(1)
 
             examples_dest = output_path / "examples"
@@ -814,7 +851,7 @@ else:
             prog="huap",
             description="HUAP CLI - Pod development tools"
         )
-        parser.add_argument("--version", action="version", version="huap 0.1.0")
+        parser.add_argument("--version", action="version", version="huap 0.1.0b1")
 
         subparsers = parser.add_subparsers(dest="command")
 

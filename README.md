@@ -313,7 +313,7 @@ pip install -e packages/hu-plugins-cmp         # Commonplace tool pack
 ## 🗂 Repository Layout
 
 ```
-huap-core/
+HUAP/
 ├── packages/
 │   ├── hu-core/              # Core library (pip installable)
 │   │   └── hu_core/

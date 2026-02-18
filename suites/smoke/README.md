@@ -1,26 +1,25 @@
 # Smoke Suite
 
-This directory contains baseline traces for CI regression testing.
+This directory contains CI support files for smoke testing.
 
 ## Usage
 
 ```bash
-# Record a new baseline
+# Record a baseline trace
 export HUAP_LLM_MODE=stub
-huap trace run hello sequential --out suites/smoke/hello_baseline.jsonl
+huap trace run hello examples/graphs/hello.yaml --out traces/hello.jsonl
 
-# Replay and verify
-huap trace replay suites/smoke/hello_baseline.jsonl --mode exec --verify
+# Replay and verify determinism
+huap trace replay traces/hello.jsonl --mode exec --verify
 
-# Diff against candidate
-huap trace diff suites/smoke/hello_baseline.jsonl runs/candidate.jsonl
+# Diff against a candidate run
+huap trace diff traces/hello.jsonl traces/candidate.jsonl
 ```
 
 ## Files
 
-- `hello_baseline.jsonl` - Baseline trace for hello-pod
-- `diff_policy.yaml` - Thresholds for regression detection
-- `budgets.yaml` - Cost/quality budgets for evaluation
+- `diff_policy.yaml` — Thresholds for regression detection
+- `budgets.yaml` — Cost/quality budgets for evaluation
 
 ## CI Integration
 
@@ -29,5 +28,6 @@ huap trace diff suites/smoke/hello_baseline.jsonl runs/candidate.jsonl
 - name: Run smoke tests
   run: |
     export HUAP_LLM_MODE=stub
-    huap trace replay suites/smoke/hello_baseline.jsonl --verify
+    huap trace run hello examples/graphs/hello.yaml --out /tmp/smoke.jsonl
+    huap trace replay /tmp/smoke.jsonl --mode exec --verify
 ```

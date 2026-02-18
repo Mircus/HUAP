@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/huap-ai/huap-core"
-Documentation = "https://github.com/huap-ai/huap-core#readme"
-Repository = "https://github.com/huap-ai/huap-core"
+Homepage = "https://github.com/Mircus/HUAP"
+Documentation = "https://github.com/Mircus/HUAP#readme"
+Repository = "https://github.com/Mircus/HUAP"
 
 [project.scripts]
 huap = "hu_core.cli.main:main"

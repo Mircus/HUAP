@@ -1,46 +1,41 @@
 # HUAP Test Suites
 
-This directory contains trace files for CI evaluation.
+This directory contains support files for CI evaluation.
 
 ## Structure
 
 ```
 suites/
-├── smoke/              # Quick smoke tests (run on every PR)
-│   ├── soma_plan.trace.jsonl
-│   └── tool_success.trace.jsonl
-├── integration/        # Full integration tests
-└── regression/         # Regression test baselines
+└── smoke/              # Quick smoke test support files
+    ├── diff_policy.yaml
+    ├── budgets.yaml
+    └── README.md
 ```
 
 ## Smoke Suite
 
-The `smoke/` suite contains minimal tests that verify core functionality:
+The `smoke/` suite contains configuration for quick regression checks:
 
-| Trace | Description | Budget Scenario |
-|-------|-------------|-----------------|
-| `soma_plan.trace.jsonl` | SOMA workout plan generation | `soma_plan` |
-| `tool_success.trace.jsonl` | Basic tool execution | default |
+| File | Description |
+|------|-------------|
+| `diff_policy.yaml` | Thresholds for regression detection |
+| `budgets.yaml` | Cost/quality budgets for evaluation |
 
 ## Running Tests
 
 ### Local
 
 ```bash
-# Run smoke suite
-huap ci check suites/smoke --budgets budgets/default.yaml
+# Run the hello workflow and produce a trace
+export HUAP_LLM_MODE=stub
+huap trace run hello examples/graphs/hello.yaml --out traces/hello.jsonl
 
-# Evaluate a single trace
-huap eval trace suites/smoke/soma_plan.trace.jsonl --scenario soma_plan
+# Replay and verify determinism
+huap trace replay traces/hello.jsonl --mode exec --verify
 
-# View trace events
-huap trace view suites/smoke/soma_plan.trace.jsonl
+# Evaluate the trace
+huap eval trace traces/hello.jsonl
 ```
-
-### CI
-
-Tests run automatically on pull requests via GitHub Actions.
-See `.github/workflows/huap-ci.yml`.
 
 ## Adding New Tests
 
@@ -59,13 +54,3 @@ See `.github/workflows/huap-ci.yml`.
    git add suites/smoke/<name>.trace.jsonl
    git commit -m "Add <name> smoke test"
    ```
-
-## Budget Scenarios
-
-Scenarios can be specified per-trace to apply different budget thresholds:
-
-- `soma_plan` - Stricter limits for SOMA generation (10K tokens, $0.10)
-- `tool_retry` - Allows one tool error (for retry testing)
-- `complex_analysis` - Higher limits for complex workflows
-
-See `budgets/default.yaml` for full configuration.
