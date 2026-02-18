@@ -1,13 +1,25 @@
 """
-HUAP CrewAI Adapter — instrument CrewAI runs as HUAP traces.
+HUAP CrewAI Adapter — manual instrumentation for CrewAI runs as HUAP traces.
+
+**Status: manual instrumentation only.**
+CrewAI does not expose a public callback/plugin API, so this adapter
+provides a tracer with explicit methods you call from your CrewAI hooks
+or wrapper code. There is no automatic monkey-patching.
 
 Usage:
     from hu_core.adapters.crewai import huap_trace_crewai
 
-    with huap_trace_crewai(out="traces/crewai.jsonl", run_name="demo"):
+    with huap_trace_crewai(out="traces/crewai.jsonl", run_name="demo") as tracer:
+        # Call tracer methods manually around your CrewAI code:
+        tracer.on_agent_step("researcher", "Find info")
+        tracer.on_tool_call("search", {"query": "AI agents"})
+        tracer.on_tool_result("search", {"results": [...]}, duration_ms=120)
+        tracer.on_llm_request("gpt-4o", [{"role": "user", "content": "..."}])
+        tracer.on_llm_response("gpt-4o", "response text", usage={...})
         crew.kickoff()
 
-Requires: crewai (optional dependency)
+All events are collected and written as a standard HUAP trace on context exit.
+The trace is compatible with replay, diff, eval, and CI.
 """
 from __future__ import annotations
 

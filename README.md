@@ -199,13 +199,18 @@ Enable with: `HUAP_ROUTER_ENABLED=1`
 
 Keep your existing framework — HUAP makes it traceable.
 
-**CrewAI:**
+**CrewAI (manual instrumentation):**
 ```python
 from hu_core.adapters.crewai import huap_trace_crewai
 
-with huap_trace_crewai(out="traces/crewai.jsonl", run_name="demo"):
+with huap_trace_crewai(out="traces/crewai.jsonl", run_name="demo") as tracer:
+    tracer.on_agent_step("researcher", "Find info about AI")
+    tracer.on_llm_request("gpt-4o", [{"role": "user", "content": "..."}])
+    tracer.on_llm_response("gpt-4o", "...", usage={"total_tokens": 50})
     crew.kickoff()
 ```
+> CrewAI has no public callback API, so events must be added manually.
+> The trace is still fully compatible with replay, diff, eval, and CI.
 
 **LangChain / LangGraph:**
 ```python
