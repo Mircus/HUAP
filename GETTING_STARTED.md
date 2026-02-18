@@ -204,10 +204,10 @@ Add to `.github/workflows/ci.yml`:
 
 ## Next Steps
 
-- Read [Concepts](CONCEPTS.md) for architecture details
-- Read [Pod Authoring](POD_AUTHORING.md) for best practices
-- Read [Trace Guide](TRACE_GUIDE.md) for trace format details
+- Read [Conformance](CONFORMANCE.md) for interface & schema contracts
 - Explore examples in `examples/pods/`
+- Try the model router: `huap models init && huap models list`
+- Set up human gates: `huap inbox list`
 
 ---
 
