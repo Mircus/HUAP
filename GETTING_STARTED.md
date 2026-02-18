@@ -14,7 +14,9 @@ This guide walks you through building and testing your first HUAP agent.
 ## Installation
 
 ```bash
-pip install huap-core
+# Install from source (not yet on PyPI)
+git clone https://github.com/Mircus/HUAP.git && cd HUAP
+pip install -e packages/hu-core
 ```
 
 Verify installation:
@@ -191,7 +193,7 @@ Add to `.github/workflows/ci.yml`:
 
 ```yaml
 - name: Install HUAP
-  run: pip install huap-core
+  run: pip install -e packages/hu-core
 
 - name: Run smoke tests
   run: |

@@ -26,7 +26,8 @@ HUAP Core provides the foundational toolkit for building AI agent systems that a
 ## 🚀 Quick Start (60 seconds)
 
 ```bash
-pip install huap-core
+# Install from source (not yet on PyPI)
+pip install -e packages/hu-core
 
 # Option A: Create a full workspace (recommended)
 huap init demo && cd demo
@@ -286,10 +287,10 @@ The `MemoryPort` interface lets agents persist and retrieve knowledge across run
 
 Built-in `memory_tools` (`hu_core.tools.memory_tools`) give nodes access to `retain`, `recall`, and `reflect` operations. An **ingest policy** (`hu_core.policies`) controls what gets stored automatically.
 
-Install optional packages:
+Install optional packages (from source):
 ```bash
-pip install hu-plugins-hindsight   # Memory backend
-pip install hu-plugins-cmp         # Commonplace tool pack
+pip install -e packages/hu-plugins-hindsight   # Memory backend
+pip install -e packages/hu-plugins-cmp         # Commonplace tool pack
 ```
 
 ---
