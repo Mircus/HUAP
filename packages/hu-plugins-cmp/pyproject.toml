@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hu-plugins-cmp"
+version = "0.1.0"
+description = "HUAP plugin: Commonplace (CMP) toolpack — capture, link, search markdown notes"
+requires-python = ">=3.10"
+dependencies = [
+    "huap-core>=0.1.0b1",
+]

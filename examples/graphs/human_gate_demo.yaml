@@ -1,0 +1,38 @@
+# Human Gate Demo Workflow
+# Demonstrates pause/resume with human approval.
+#
+# Run:
+#   HUAP_LLM_MODE=stub huap trace run human_gate_demo examples/graphs/human_gate_demo.yaml --out traces/hg.jsonl
+#   huap inbox list
+#   huap inbox approve <gate_id> --note "ok"
+
+name: human_gate_demo
+version: "0.1.0"
+description: "Agent proposes sending an email; requires human approval before proceeding."
+
+nodes:
+  - name: prepare_email
+    run: examples.pods.human_gate_demo.human_gate_nodes.prepare_email_node
+    description: "Draft the outbound email"
+
+  - name: request_approval
+    run: examples.pods.human_gate_demo.human_gate_nodes.request_approval_node
+    description: "Pause for human approval (human gate)"
+
+  - name: send_email
+    run: examples.pods.human_gate_demo.human_gate_nodes.send_email_node
+    description: "Send the email if approved"
+
+  - name: finalize
+    run: examples.pods.human_gate_demo.human_gate_nodes.finalize_node
+    description: "Log outcome"
+
+edges:
+  - from: prepare_email
+    to: request_approval
+  - from: request_approval
+    to: send_email
+  - from: send_email
+    to: finalize
+  - from: finalize
+    to: null

@@ -39,11 +39,14 @@ hu-myagent/
 ├── hu_myagent/
 │   ├── __init__.py
 │   ├── pod.py          # Your pod implementation
-│   └── myagent.yaml    # Workflow definition
+│   └── myagent.yaml    # Workflow definition (nodes[] + edges[] spec)
 ├── tests/
 │   └── test_myagent_pod.py
 └── pyproject.toml
 ```
+
+The generated workflow YAML uses the **runnable `nodes[]` + `edges[]` spec**.
+Each node's `run:` field points to an importable Python function.
 
 ---
 

@@ -418,6 +418,117 @@ Return ONLY valid JSON in this format:
 
 
 # =============================================================================
+# ROUTED LLM CLIENT (Specialist Squad integration)
+# =============================================================================
+
+
+class RoutedLLMClient:
+    """
+    LLM client that delegates model selection to the ModelRouter.
+
+    Enable with ``HUAP_ROUTER_ENABLED=1``.  Falls back to stub when
+    ``HUAP_LLM_MODE=stub`` regardless of router config.
+
+    Back-compatible: callers can keep using ``chat_completion_with_usage``
+    exactly as before, but optionally pass ``capability`` to let the router
+    choose the model.
+    """
+
+    def __init__(
+        self,
+        tracer: Optional[Any] = None,
+        registry_path: Optional[str] = None,
+        policy_path: Optional[str] = None,
+    ):
+        from .model_registry import ModelRegistry
+        from .model_router import ModelRouter
+        from .providers import StubProvider, OllamaProvider, OpenAIProvider
+
+        self._tracer = tracer
+        self._pod: Optional[str] = None
+        self._registry = ModelRegistry.load(registry_path)
+        self._router = ModelRouter.load(self._registry, policy_path)
+
+        self._providers = {
+            "stub": StubProvider(),
+            "ollama": OllamaProvider(),
+            "openai": OpenAIProvider(),
+        }
+
+        self._stub_mode = os.getenv("HUAP_LLM_MODE", "").lower() == "stub"
+
+    def set_tracer(self, tracer: Any, pod: Optional[str] = None) -> None:
+        self._tracer = tracer
+        self._pod = pod
+
+    async def chat_completion_with_usage(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.2,
+        max_tokens: int = 800,
+        capability: str = "chat",
+    ) -> LLMResponse:
+        """Route to the best model, call the provider, and trace the decision."""
+        import time
+
+        # Force stub when HUAP_LLM_MODE=stub
+        if self._stub_mode:
+            from .providers import StubProvider
+            provider = StubProvider()
+            resp = await provider.chat_completion("stub", messages, temperature, max_tokens)
+            self._trace_router_decision("stub_chat", "stub", "__forced_stub", "HUAP_LLM_MODE=stub")
+            return LLMResponse(
+                text=resp.text,
+                model=resp.model,
+                usage=resp.usage,
+                latency_ms=resp.latency_ms,
+            )
+
+        decision = self._router.select(capability=capability)
+        spec = decision.model
+
+        self._trace_router_decision(spec.id, spec.provider, decision.rule_name, decision.reason)
+
+        provider = self._providers.get(spec.provider)
+        if provider is None:
+            raise ValueError(f"Unknown provider '{spec.provider}' for model '{spec.id}'")
+
+        resp = await provider.chat_completion(
+            model=spec.model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            endpoint=spec.endpoint,
+        )
+
+        return LLMResponse(
+            text=resp.text,
+            model=resp.model,
+            usage=resp.usage,
+            latency_ms=resp.latency_ms,
+        )
+
+    def _trace_router_decision(
+        self,
+        model_id: str,
+        provider: str,
+        rule_name: str,
+        reason: str,
+    ) -> None:
+        """Emit a policy_check trace event for the routing decision."""
+        if not self._tracer:
+            return
+        if hasattr(self._tracer, "policy_check"):
+            self._tracer.policy_check(
+                policy="router",
+                decision=model_id,
+                reason=reason,
+                inputs={"provider": provider, "rule": rule_name},
+                pod=self._pod,
+            )
+
+
+# =============================================================================
 # CONTEXT-AWARE CLIENT ACCESS
 # =============================================================================
 

@@ -230,6 +230,7 @@ def load_graph_from_yaml(yaml_data: Dict[str, Any]) -> GraphRunner:
 
 def _import_function(path: str) -> Callable:
     """Import a function from a dotted path."""
+    import sys
     from importlib import import_module
 
     if not path:
@@ -238,6 +239,12 @@ def _import_function(path: str) -> Callable:
     parts = path.rsplit(".", 1)
     if len(parts) != 2:
         raise ValueError(f"Invalid function path: {path}")
+
+    # Ensure workspace root (cwd) is importable so pods/ packages resolve
+    import os
+    cwd = os.getcwd()
+    if cwd not in sys.path:
+        sys.path.insert(0, cwd)
 
     module_path, func_name = parts
     try:

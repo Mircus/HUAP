@@ -1,0 +1,39 @@
+# Tool-Learning-with-Memory Demo
+# An agent that uses memory to improve tool choice across runs.
+#
+# Run (stub mode):
+#   HUAP_LLM_MODE=stub huap trace run tool_learning examples/graphs/tool_learning_with_memory.yaml --out traces/tool_learning.jsonl
+#
+# With Hindsight plugin:
+#   Enable memory_hindsight in config/plugins.yaml, then re-run.
+
+name: tool_learning
+version: "0.1.0"
+description: "Agent retains tool outcomes and recalls them to improve future decisions."
+
+nodes:
+  - name: recall_past
+    run: examples.pods.tool_learning.tool_learning_nodes.recall_past_node
+    description: "Recall what tools worked (or failed) before"
+
+  - name: choose_tool
+    run: examples.pods.tool_learning.tool_learning_nodes.choose_tool_node
+    description: "Pick a tool based on recalled memories"
+
+  - name: execute_tool
+    run: examples.pods.tool_learning.tool_learning_nodes.execute_tool_node
+    description: "Run the chosen tool"
+
+  - name: retain_outcome
+    run: examples.pods.tool_learning.tool_learning_nodes.retain_outcome_node
+    description: "Store the outcome in memory for future runs"
+
+edges:
+  - from: recall_past
+    to: choose_tool
+  - from: choose_tool
+    to: execute_tool
+  - from: execute_tool
+    to: retain_outcome
+  - from: retain_outcome
+    to: null

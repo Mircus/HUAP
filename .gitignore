@@ -76,6 +76,9 @@ trace_diff.json
 # Keep golden traces (override above)
 !examples/traces/
 
+# Archive (local reference only)
+archive/
+
 # Misc
 .env.*.swp
 .claude/

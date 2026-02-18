@@ -416,6 +416,62 @@ huap ci check suites/smoke --budgets budgets/default.yaml
         click.echo("  2. Run: huap ci check suites/smoke")
         click.echo("  3. Commit and push to trigger GitHub Actions")
 
+    @ci.command("run")
+    @click.argument("suite", type=click.Path(exists=True))
+    @click.option("--budgets", "-b", default=None, help="Budget config YAML file")
+    @click.option("--out", "-o", default="reports", help="Output directory for reports")
+    def ci_run(suite: str, budgets: Optional[str], out: str):
+        """
+        Run a suite, diff against golden traces, evaluate budgets.
+
+        Exits non-zero on regression or budget violation.
+
+        SUITE: Path to suite YAML file (e.g. suites/smoke/smoke.yaml)
+
+        Example:
+            huap ci run suites/smoke/smoke.yaml --budgets budgets/cheap.yaml --out reports/
+        """
+        from ..ci.runner import CIRunner
+
+        click.echo("=" * 60)
+        click.echo("HUAP CI Run")
+        click.echo("=" * 60)
+        click.echo(f"Suite: {suite}")
+        if budgets:
+            click.echo(f"Budgets: {budgets}")
+        click.echo(f"Output: {out}")
+        click.echo("")
+
+        runner = CIRunner(
+            suite_path=suite,
+            budgets_path=budgets,
+            output_dir=out,
+        )
+        report = runner.run()
+
+        for s in report.scenarios:
+            status = "PASS" if s.passed else "FAIL"
+            click.echo(f"  [{status}] {s.name}")
+            if s.diff_issues:
+                for issue in s.diff_issues[:3]:
+                    click.echo(f"        diff: {issue}")
+            if s.eval_issues:
+                for issue in s.eval_issues[:3]:
+                    click.echo(f"        eval: {issue}")
+            if s.error:
+                click.echo(f"        error: {s.error[:200]}")
+
+        click.echo("")
+        click.echo("=" * 60)
+        if report.passed:
+            click.echo(f"CI RUN: PASSED ({report.pass_count}/{len(report.scenarios)})")
+        else:
+            click.echo(f"CI RUN: FAILED ({report.pass_count}/{len(report.scenarios)} passed)", err=True)
+        click.echo("=" * 60)
+
+        if not report.passed:
+            sys.exit(1)
+
 else:
     def ci():
         print("CI commands require 'click' package. Install with: pip install click")

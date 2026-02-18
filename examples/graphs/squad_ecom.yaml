@@ -1,0 +1,48 @@
+# Specialist Squad E-commerce Demo
+# Run with:
+#   HUAP_ROUTER_ENABLED=1 HUAP_LLM_MODE=stub \
+#     huap trace run squad_ecom examples/graphs/squad_ecom.yaml --out traces/squad_ecom.jsonl
+#
+# Six specialist nodes demonstrating the model router:
+#   SAM (vision) -> VLM (chat) -> MoE (classify) -> LAM (fs) -> SLM (search) -> LLM (chat)
+
+name: squad_ecom
+version: "0.1.0"
+description: "E-commerce specialist squad demo"
+
+nodes:
+  - name: sam_strip_background
+    run: examples.pods.squad_ecom.squad_ecom_nodes.sam_strip_background
+    description: "Strip product image background (vision)"
+
+  - name: vlm_write_description
+    run: examples.pods.squad_ecom.squad_ecom_nodes.vlm_write_description
+    description: "Write product description (vision/chat)"
+
+  - name: moe_route_ticket
+    run: examples.pods.squad_ecom.squad_ecom_nodes.moe_route_ticket
+    description: "Route support ticket (classify)"
+
+  - name: lam_process_order
+    run: examples.pods.squad_ecom.squad_ecom_nodes.lam_process_order
+    description: "Process order and update inventory (fs)"
+
+  - name: slm_local_search
+    run: examples.pods.squad_ecom.squad_ecom_nodes.slm_local_search
+    description: "Local product search (simple)"
+
+  - name: llm_handle_complaint
+    run: examples.pods.squad_ecom.squad_ecom_nodes.llm_handle_complaint
+    description: "Handle customer complaint (chat)"
+
+edges:
+  - from: sam_strip_background
+    to: vlm_write_description
+  - from: vlm_write_description
+    to: moe_route_ticket
+  - from: moe_route_ticket
+    to: lam_process_order
+  - from: lam_process_order
+    to: slm_local_search
+  - from: slm_local_search
+    to: llm_handle_complaint

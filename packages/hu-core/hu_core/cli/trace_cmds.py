@@ -40,7 +40,7 @@ if HAS_CLICK:
         GRAPH: Path to YAML graph definition
 
         Examples:
-            huap trace run hello examples/graphs/sequential.yaml --out traces/hello.jsonl
+            huap trace run hello examples/graphs/hello.yaml --out traces/hello.jsonl
             huap trace run myagent graphs/myagent.yaml --input input.json
         """
         import asyncio
@@ -330,6 +330,123 @@ if HAS_CLICK:
         except Exception as e:
             click.echo(f"Error viewing trace: {e}", err=True)
             sys.exit(1)
+
+    @trace.command("wrap", context_settings=dict(
+        ignore_unknown_options=True,
+    ))
+    @click.option("--out", "-o", required=True, help="Output trace file path")
+    @click.option("--name", "-n", default=None, help="Run name (default: command string)")
+    @click.option("--merge", default=None, help="Merge adapter-emitted events from this file")
+    @click.option("--timeout", "-t", default=None, type=int, help="Timeout in seconds")
+    @click.argument("command", nargs=-1, type=click.UNPROCESSED, required=True)
+    def trace_wrap(out: str, name: Optional[str], merge: Optional[str], timeout: Optional[int], command):
+        """
+        Wrap any command and produce a HUAP trace.
+
+        Captures run_start/run_end, wall time, exit code, and stdout/stderr
+        as trace events.
+
+        COMMAND: The command to run (use -- to separate from huap flags)
+
+        Examples:
+            huap trace wrap --out traces/x.jsonl -- python -c "print('hi')"
+            huap trace wrap --out traces/agent.jsonl -- python my_agent.py --mode fast
+        """
+        if not command:
+            click.echo("Error: No command specified.", err=True)
+            sys.exit(1)
+
+        from ..trace.wrap import wrap_command
+
+        cmd_list = list(command)
+        click.echo(f"Wrapping command: {' '.join(cmd_list)}")
+
+        result = wrap_command(
+            command=cmd_list,
+            output_path=out,
+            run_name=name,
+            merge_path=merge,
+            timeout=timeout,
+        )
+
+        click.echo(f"\nTrace saved to: {result['trace_path']}")
+        click.echo(f"Run ID: {result['run_id']}")
+        click.echo(f"Exit code: {result['exit_code']}")
+        click.echo(f"Duration: {result['duration_ms']:.1f}ms")
+        click.echo(f"Events: {result['event_count']}")
+        if result.get('merged_events'):
+            click.echo(f"Merged adapter events: {result['merged_events']}")
+
+        if result['exit_code'] != 0:
+            sys.exit(result['exit_code'])
+
+    @trace.command("report")
+    @click.argument("trace_file", type=click.Path(exists=True))
+    @click.option("--out", "-o", default=None, help="Output HTML file path")
+    @click.option("--baseline", "-b", default=None, type=click.Path(exists=True), help="Baseline trace for diff summary")
+    def trace_report(trace_file: str, out: Optional[str], baseline: Optional[str]):
+        """
+        Generate a standalone HTML report from a trace file.
+
+        TRACE_FILE: Path to the trace JSONL file
+
+        Examples:
+            huap trace report traces/run.jsonl --out reports/run.html
+            huap trace report traces/run.jsonl --baseline traces/golden/run.jsonl
+        """
+        if out is None:
+            out = Path(trace_file).with_suffix(".html")
+
+        from ..trace.report import generate_report
+
+        click.echo(f"Generating report from: {trace_file}")
+        report_path = generate_report(
+            trace_path=trace_file,
+            output_path=str(out),
+            baseline_path=baseline,
+        )
+        click.echo(f"Report saved to: {report_path}")
+        click.echo("Open in a browser to view.")
+
+    @trace.command("validate")
+    @click.argument("trace_file", type=click.Path(exists=True))
+    def trace_validate(trace_file: str):
+        """
+        Validate a trace file's JSONL schema.
+
+        TRACE_FILE: Path to the trace JSONL file
+
+        Example:
+            huap trace validate traces/x.jsonl
+        """
+        import json as _json
+
+        click.echo(f"Validating: {trace_file}")
+        errors = []
+        event_count = 0
+
+        with open(trace_file, "r") as f:
+            for i, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    evt = _json.loads(line)
+                    event_count += 1
+                    if "run_id" not in evt:
+                        errors.append(f"Line {i}: missing 'run_id'")
+                    if "kind" not in evt and "name" not in evt:
+                        errors.append(f"Line {i}: missing 'kind' or 'name'")
+                except _json.JSONDecodeError as e:
+                    errors.append(f"Line {i}: invalid JSON — {e}")
+
+        if errors:
+            click.echo(f"\nValidation FAILED ({len(errors)} error(s)):", err=True)
+            for err in errors[:10]:
+                click.echo(f"  - {err}", err=True)
+            sys.exit(1)
+        else:
+            click.echo(f"Valid HUAP trace: {event_count} event(s)")
 
 else:
     # Fallback for when click is not available

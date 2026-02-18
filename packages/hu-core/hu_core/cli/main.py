@@ -154,38 +154,33 @@ dependencies = [
 '''
 
 WORKFLOW_TEMPLATE = '''# {name_title} Pod Workflow
-# This YAML defines the workflow graph for the {name} pod
+# Run with: huap trace run {name} hu-{name}/hu_{name}/{name}.yaml
+#
+# HUAP executes the nodes[] + edges[] YAML spec.
+# Each node's "run:" points to an importable Python function.
 
 name: {name}
 version: "0.1.0"
 description: "{description}"
 
-# Workflow nodes
 nodes:
-  start:
-    type: entry
-    next: process
+  - name: start
+    run: hu_{name}.pod.start_node
+    description: "Initialize the workflow"
 
-  process:
-    type: action
-    action: process_session
-    next: analyze
+  - name: process
+    run: hu_{name}.pod.process_node
+    description: "Process input data"
 
-  analyze:
-    type: action
-    action: analyze_data
-    next: recommend
+  - name: end
+    run: hu_{name}.pod.end_node
+    description: "Finalize the workflow"
 
-  recommend:
-    type: action
-    action: generate_recommendation
-    next: end
-
-  end:
-    type: exit
-
-# Default entry point
-entry: start
+edges:
+  - from: start
+    to: process
+  - from: process
+    to: end
 '''
 
 TEST_TEMPLATE = '''"""
@@ -455,6 +450,26 @@ if HAS_CLICK:
     # Register CI commands
     from .ci_cmds import ci
     cli.add_command(ci)
+
+    # Register init command
+    from .init_cmds import init
+    cli.add_command(init)
+
+    # Register models commands
+    from .models_cmds import models
+    cli.add_command(models)
+
+    # Register inbox commands (human gates)
+    from .inbox_cmds import inbox
+    cli.add_command(inbox)
+
+    # Register watch command
+    from .watch_cmds import watch
+    cli.add_command(watch)
+
+    # Register plugins commands
+    from .plugins_cmds import plugins
+    cli.add_command(plugins)
 
     @pod.command("create")
     @click.argument("name")
