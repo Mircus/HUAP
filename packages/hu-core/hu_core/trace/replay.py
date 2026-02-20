@@ -288,86 +288,6 @@ class StubbedLLMClient:
 
         raise ValueError("No LLM stub found and no real client available")
 
-    async def generate_workout_plan(
-        self,
-        goal: str,
-        current_fitness: Dict[str, Any],
-        constraints: List[str],
-        days_per_week: int = 4,
-    ) -> Dict[str, Any]:
-        """Stubbed version of generate_workout_plan."""
-        import json
-        from datetime import datetime
-
-        # Build a fake message to get stub
-        messages = [{"role": "user", "content": f"workout plan for {goal}"}]
-        stub = self.stubs.get_llm_stub(messages)
-
-        if stub:
-            try:
-                plan_data = json.loads(stub.result) if isinstance(stub.result, str) else stub.result
-            except (json.JSONDecodeError, TypeError):
-                plan_data = {"plan": stub.result}
-            return {
-                "plan": plan_data,
-                "timestamp": datetime.utcnow().isoformat(),
-                "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-                "model": "stub-model",
-                "latency_ms": stub.duration_ms,
-            }
-
-        if self.real_client:
-            return await self.real_client.generate_workout_plan(
-                goal, current_fitness, constraints, days_per_week
-            )
-
-        # Return a minimal stub response
-        return {
-            "plan": {"weekly_overview": "Stub plan", "days": []},
-            "timestamp": datetime.utcnow().isoformat(),
-            "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-            "model": "stub-model",
-            "latency_ms": 0,
-        }
-
-    async def analyze_health_data(
-        self,
-        data: Dict[str, Any],
-        context: str = "",
-        goal: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        """Stubbed version of analyze_health_data."""
-        from datetime import datetime
-
-        # Build a fake message to get stub
-        messages = [{"role": "user", "content": f"analyze health data"}]
-        stub = self.stubs.get_llm_stub(messages)
-
-        if stub:
-            return {
-                "analysis": stub.result,
-                "data_analyzed": list(data.keys()),
-                "full_analysis": {},
-                "timestamp": datetime.utcnow().isoformat(),
-                "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-                "model": "stub-model",
-                "latency_ms": stub.duration_ms,
-            }
-
-        if self.real_client:
-            return await self.real_client.analyze_health_data(data, context, goal)
-
-        # Return a minimal stub response
-        return {
-            "analysis": "Stub analysis",
-            "data_analyzed": list(data.keys()),
-            "full_analysis": {},
-            "timestamp": datetime.utcnow().isoformat(),
-            "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
-            "model": "stub-model",
-            "latency_ms": 0,
-        }
-
     def set_tracer(self, tracer: Any, pod: Optional[str] = None) -> None:
         """Stub tracer setter - does nothing but prevents AttributeError."""
         pass
@@ -419,15 +339,15 @@ class TraceReplayer:
 
     Usage:
         replayer = TraceReplayer(
-            trace_path="runs/soma.trace.jsonl",
+            trace_path="runs/hello.trace.jsonl",
             stub_tools=True,
             stub_llm=True,
         )
         # Re-emit mode (default, legacy)
-        result = await replayer.replay(output_path="runs/soma.replay.jsonl")
+        result = await replayer.replay(output_path="runs/hello.replay.jsonl")
 
         # Execution mode (actually runs the workflow)
-        result = await replayer.replay(output_path="runs/soma.replay.jsonl", mode="exec")
+        result = await replayer.replay(output_path="runs/hello.replay.jsonl", mode="exec")
     """
 
     def __init__(
@@ -532,6 +452,7 @@ class TraceReplayer:
             start_data = start_event.data if isinstance(start_event.data, dict) else start_event.data.model_dump()
             pod_name = start_data.get("pod", "unknown")
             graph_name = start_data.get("graph")
+            graph_path_str = start_data.get("graph_path")
             input_state = start_data.get("input", {})
 
         # Determine output path
@@ -560,21 +481,36 @@ class TraceReplayer:
         try:
             from .runner import run_pod_graph
 
-            result = await run_pod_graph(
-                pod=pod_name,
-                graph=graph_name or "replay",
-                input_state=input_state,
-                output_path=out_path,
-                config_path=self.config_path,
-                llm_client=stubbed_llm,
-                tool_registry=stubbed_tools,
-            )
+            # Resolve graph path: prefer stored graph_path, fall back to graph name
+            resolved_graph = None
+            if graph_path_str:
+                resolved_graph = Path(graph_path_str)
+            elif graph_name:
+                # Try common locations
+                for candidate in [
+                    Path(graph_name),
+                    Path(f"examples/graphs/{graph_name}.yaml"),
+                    Path(f"graphs/{graph_name}.yaml"),
+                ]:
+                    if candidate.exists():
+                        resolved_graph = candidate
+                        break
 
-            replay_run_id = result.get("run_id", replay_run_id)
-            final_state = result.get("final_state", {})
+            if resolved_graph is None or not resolved_graph.exists():
+                errors.append(f"Cannot resolve graph path for '{graph_name}' — replay exec requires the original graph file")
+            else:
+                result = await run_pod_graph(
+                    pod=pod_name,
+                    graph_path=resolved_graph,
+                    input_state=input_state,
+                    output_path=out_path,
+                )
 
-            if result.get("error"):
-                errors.append(result["error"])
+                replay_run_id = result.get("run_id", replay_run_id)
+                final_state = result.get("final_state", {})
+
+                if result.get("error"):
+                    errors.append(result["error"])
 
         except Exception as e:
             errors.append(str(e))

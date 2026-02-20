@@ -10,7 +10,7 @@ Usage:
     tracer = get_trace_service()
 
     # Start a run
-    tracer.start_run(pod="hu-soma", graph="soma_plan")
+    tracer.start_run(pod="hello", graph="hello")
 
     # Emit events
     tracer.node_enter("start_node", state={"goal": "fitness"})

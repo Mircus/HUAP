@@ -89,7 +89,7 @@ Total events: 8
 [00:00:00.000] system/run_start
   span: sp-000
   pod: hello
-  graph: hello_workflow
+  graph: hello
 
 [00:00:00.010] node/node_enter
   span: sp-001

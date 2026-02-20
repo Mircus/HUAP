@@ -342,7 +342,7 @@ def get_default_budget_config() -> BudgetConfig:
             },
         ),
         scenarios={
-            "soma_plan": {
+            "hello": {
                 "cost": {
                     "tokens_max": 10000,
                     "usd_max": 0.10,

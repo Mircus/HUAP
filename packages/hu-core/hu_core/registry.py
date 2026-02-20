@@ -164,7 +164,7 @@ class PodRegistry:
         Get pod by name.
 
         Args:
-            pod_name: Name of pod (e.g., "soma")
+            pod_name: Name of pod (e.g., "hello")
 
         Returns:
             Pod object
@@ -230,7 +230,7 @@ class PodRegistry:
             Schema dict with fields for form generation
             Example:
             {
-                "pod_name": "soma",
+                "pod_name": "hello",
                 "fields": [
                     {
                         "name": "location",
@@ -274,7 +274,7 @@ class PodRegistry:
         Returns:
             Metadata dict
             {
-                "name": "soma",
+                "name": "hello",
                 "version": "0.1.0",
                 "enabled": True,
                 "description": "...",

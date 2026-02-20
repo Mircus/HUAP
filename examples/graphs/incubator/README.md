@@ -5,4 +5,4 @@ These YAML files use an **experimental DSL** (`type: entry/action/branch` with `
 They are kept here for future reference and development.
 
 **The runnable YAML spec** uses `nodes[]` + `edges[]` with `run:` import paths.
-See `examples/graphs/hello.yaml` and `examples/graphs/hello_workflow.yaml` for working examples.
+See `examples/graphs/hello.yaml` for a working example.

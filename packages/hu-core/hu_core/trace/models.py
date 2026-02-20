@@ -86,6 +86,7 @@ class RunStartData(BaseModel):
     """Data for run_start event."""
     pod: str
     graph: Optional[str] = None
+    graph_path: Optional[str] = None  # Full path for replay exec resolution
     input: Dict[str, Any] = Field(default_factory=dict)  # Full input for replay exec
     input_keys: List[str] = Field(default_factory=list)  # Kept for backward compat
     input_hash: Optional[str] = None

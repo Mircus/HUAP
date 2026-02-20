@@ -248,8 +248,8 @@ class PodContract(ABC):
             return [
                 {
                     "name": "planner",
-                    "goal_template": "Create a fitness plan for: {task}",
-                    "system_prompt": "You are SOMA fitness coach.",
+                    "goal_template": "Execute task: {task}",
+                    "system_prompt": "You are a helpful assistant.",
                     "allowed_tools": ["memory_read", "memory_write"],
                     "max_steps": 5,
                 }

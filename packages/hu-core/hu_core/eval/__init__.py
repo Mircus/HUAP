@@ -15,7 +15,7 @@ Usage:
 
     # Evaluate a single trace
     evaluator = TraceEvaluator(budget)
-    result = evaluator.evaluate("trace.jsonl", scenario="soma_plan")
+    result = evaluator.evaluate("trace.jsonl", scenario="default")
 
     # Run a suite
     runner = SuiteRunner(budget)

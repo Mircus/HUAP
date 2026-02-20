@@ -129,7 +129,7 @@ if HAS_CLICK:
         TRACE_FILE: Path to trace JSONL file
 
         Example:
-            huap eval trace runs/soma.trace.jsonl --scenario soma_plan
+            huap eval trace runs/hello.trace.jsonl --scenario hello
         """
         from ..eval import BudgetConfig, TraceEvaluator, get_default_budget_config
         import json

@@ -217,11 +217,14 @@ def load_graph_from_yaml(yaml_data: Dict[str, Any]) -> GraphRunner:
             description=description,
         ))
 
-    # Load edges
+    # Load edges (skip terminal edges where target is null)
     for edge_def in yaml_data.get("edges", []):
+        target = edge_def.get("to")
+        if target is None:
+            continue  # null target = terminal node, no edge needed
         runner.add_edge(Edge(
             source=edge_def["from"],
-            target=edge_def["to"],
+            target=target,
             condition=edge_def.get("condition"),
         ))
 

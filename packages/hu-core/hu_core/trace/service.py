@@ -180,6 +180,7 @@ class TraceService:
         self,
         pod: Optional[str] = None,
         graph: Optional[str] = None,
+        graph_path: Optional[str] = None,
         input_data: Optional[Dict[str, Any]] = None,
         config: Optional[Dict[str, Any]] = None,
         user_id: Optional[str] = None,
@@ -234,6 +235,7 @@ class TraceService:
                 data=RunStartData(
                     pod=pod or self.default_pod,
                     graph=graph,
+                    graph_path=graph_path,
                     input=sanitize_trace_input(input_data) if input_data else {},
                     input_keys=input_keys,
                     input_hash=hash_data(input_data) if input_data else None,

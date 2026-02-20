@@ -126,8 +126,8 @@ if HAS_CLICK:
         - none: No stubs (live execution)
 
         Examples:
-            huap trace replay runs/soma.trace.jsonl --stubs llm --out runs/soma.replay.jsonl
-            huap trace replay runs/soma.trace.jsonl --mode exec --verify
+            huap trace replay runs/hello.trace.jsonl --stubs llm --out runs/hello.replay.jsonl
+            huap trace replay runs/hello.trace.jsonl --mode exec --verify
         """
         import asyncio
 
@@ -279,7 +279,7 @@ if HAS_CLICK:
         TRACE_FILE: Path to the trace JSONL file
 
         Example:
-            huap trace view runs/soma.trace.jsonl --kind llm --limit 10
+            huap trace view runs/hello.trace.jsonl --kind llm --limit 10
         """
         from ..trace.models import TraceRun
 

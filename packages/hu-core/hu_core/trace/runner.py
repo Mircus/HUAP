@@ -54,6 +54,7 @@ async def run_pod_graph(
     run_id = tracer.start_run(
         pod=pod_key,
         graph=graph_path.stem if graph_path else "default",
+        graph_path=str(graph_path) if graph_path else None,
         input_data=input_state,
         trace_path=output_path,
     )

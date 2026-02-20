@@ -24,7 +24,7 @@ Usage:
     result = await registry.execute(
         "llm_call",
         {"user_prompt": "Hello!"},
-        context=ExecutionContext(user_id="123", pod_name="soma")
+        context=ExecutionContext(user_id="123", pod_name="hello")
     )
 """
 from .base import (

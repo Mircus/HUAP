@@ -9,10 +9,10 @@ This package provides:
 Usage:
     from hu_core.contracts import PodContract, validate_pod
 
-    class MySomaPod(PodContract):
+    class MyExamplePod(PodContract):
         @property
         def name(self) -> str:
-            return "soma"
+            return "example"
         # ... implement other abstract methods
 
     # Validate pod implementation

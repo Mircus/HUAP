@@ -220,7 +220,7 @@ class TraceEvaluator:
 
     Usage:
         evaluator = TraceEvaluator(budget_config)
-        result = evaluator.evaluate("trace.jsonl", scenario="soma_plan")
+        result = evaluator.evaluate("trace.jsonl", scenario="default")
     """
 
     def __init__(self, budget: Optional[BudgetConfig] = None):

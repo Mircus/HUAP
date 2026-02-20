@@ -43,7 +43,7 @@ def load_config(path: str | Path | None = None) -> Dict[str, Any]:
 
 def _get_section(section_path: str) -> Dict[str, Any]:
     """
-    Return nested configuration section by dotted path (e.g. ``pods.soma``).
+    Return nested configuration section by dotted path (e.g. ``pods.hello``).
     """
     config = load_config()
     section: Any = config

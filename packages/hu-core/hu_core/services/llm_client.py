@@ -4,8 +4,6 @@ LLM client (OpenAI) for HUAP.
 Provides:
 - chat_completion() for raw LLM calls
 - chat_completion_with_usage() for calls that return token usage (for cost tracking)
-- generate_workout_plan() for SOMA fitness plans
-- analyze_health_data() for SOMA health analysis
 """
 from __future__ import annotations
 import os
@@ -162,39 +160,12 @@ class LLMClient:
                 last_user = msg.get("content", "").lower()
                 break
 
-        # Generate appropriate stub response based on context
-        if "plan" in last_user or "workout" in last_user or "fitness" in last_user:
-            return json.dumps({
-                "weekly_overview": "Stub workout plan for testing",
-                "days": [
-                    {
-                        "day": 1,
-                        "focus": "Test workout",
-                        "exercises": [
-                            {"name": "Test exercise", "sets": 3, "reps": 10, "notes": "Stub"}
-                        ],
-                        "duration_min": 30,
-                        "intensity": "moderate"
-                    }
-                ],
-                "recovery": "Rest as needed",
-                "progression": "Increase gradually"
-            })
-        elif "analyze" in last_user or "health" in last_user or "data" in last_user:
-            return json.dumps({
-                "observations": ["Stub observation 1", "Stub observation 2"],
-                "patterns": ["Stub pattern"],
-                "recommendations": ["Stub recommendation"],
-                "concerns": [],
-                "summary": "Stub analysis for testing"
-            })
-        else:
-            # Generic stub response
-            return json.dumps({
-                "response": "Stub response for testing",
-                "status": "ok",
-                "stub_mode": True
-            })
+        # Generic stub response
+        return json.dumps({
+            "response": "Stub response for testing",
+            "status": "ok",
+            "stub_mode": True
+        })
 
     def _trace_llm_request(
         self,
@@ -251,170 +222,6 @@ class LLMClient:
                 "tokens": usage.get("total_tokens", 0),
                 "latency_ms": latency_ms,
             })
-
-    async def generate_workout_plan(
-        self,
-        goal: str,
-        current_fitness: Dict[str, Any],
-        constraints: List[str],
-        days_per_week: int = 4
-    ) -> Dict[str, Any]:
-        """
-        Generate a personalized workout plan using LLM.
-
-        Args:
-            goal: User's fitness goal
-            current_fitness: Current fitness state (posture, activity, etc.)
-            constraints: List of constraints or focus areas
-            days_per_week: Number of workout days per week
-
-        Returns:
-            Dict with 'plan', 'timestamp', and usage info
-        """
-        # Build prompt
-        fitness_desc = json.dumps(current_fitness, indent=2)
-        constraints_desc = "\n".join(f"- {c}" for c in constraints) if constraints else "None"
-
-        prompt = f"""You are SOMA, an expert fitness coach. Create a personalized {days_per_week}-day/week workout plan.
-
-Goal: {goal}
-
-Current Fitness State:
-{fitness_desc}
-
-Constraints/Focus Areas:
-{constraints_desc}
-
-Generate a detailed workout plan with:
-1. Weekly overview
-2. Daily workouts with exercises, sets, reps, duration
-3. Recovery recommendations
-4. Progression notes
-
-Return ONLY valid JSON in this format:
-{{
-    "weekly_overview": "Brief overview of the week's approach",
-    "days": [
-        {{
-            "day": 1,
-            "focus": "Upper body strength",
-            "exercises": [
-                {{"name": "Push-ups", "sets": 3, "reps": 12, "notes": "Focus on form"}}
-            ],
-            "duration_min": 45,
-            "intensity": "moderate"
-        }}
-    ],
-    "recovery": "Recovery recommendations",
-    "progression": "How to progress over time"
-}}"""
-
-        messages = [
-            {"role": "system", "content": "You are SOMA, an expert fitness coach. Respond with valid JSON only."},
-            {"role": "user", "content": prompt}
-        ]
-
-        response = await self.chat_completion_with_usage(
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1500
-        )
-
-        # Parse JSON from response
-        text = response.text
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-
-        try:
-            plan_data = json.loads(text)
-        except json.JSONDecodeError:
-            plan_data = {"error": "Failed to parse plan", "raw": text}
-
-        return {
-            "plan": plan_data,
-            "timestamp": datetime.utcnow().isoformat(),
-            "usage": response.usage,
-            "model": response.model,
-            "latency_ms": response.latency_ms,
-        }
-
-    async def analyze_health_data(
-        self,
-        data: Dict[str, Any],
-        context: str = "",
-        goal: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Analyze health data and provide insights using LLM.
-
-        Args:
-            data: Health data to analyze (metrics, etc.)
-            context: Additional context
-            goal: User's health goal
-
-        Returns:
-            Dict with 'analysis', 'data_analyzed', 'timestamp', and usage info
-        """
-        data_desc = json.dumps(data, indent=2)
-        goal_text = f"\nUser's Goal: {goal}" if goal else ""
-        context_text = f"\nContext: {context}" if context else ""
-
-        prompt = f"""You are SOMA, an expert health analyst. Analyze the following health data and provide insights.
-
-Health Data:
-{data_desc}
-{goal_text}
-{context_text}
-
-Provide:
-1. Key observations from the data
-2. Patterns or trends
-3. Actionable recommendations
-4. Areas of concern (if any)
-
-Return ONLY valid JSON in this format:
-{{
-    "observations": ["observation 1", "observation 2"],
-    "patterns": ["pattern 1", "pattern 2"],
-    "recommendations": ["recommendation 1", "recommendation 2"],
-    "concerns": ["concern 1"] or [],
-    "summary": "Brief overall summary"
-}}"""
-
-        messages = [
-            {"role": "system", "content": "You are SOMA, an expert health analyst. Respond with valid JSON only."},
-            {"role": "user", "content": prompt}
-        ]
-
-        response = await self.chat_completion_with_usage(
-            messages=messages,
-            temperature=0.5,
-            max_tokens=1000
-        )
-
-        # Parse JSON from response
-        text = response.text
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-
-        try:
-            analysis_data = json.loads(text)
-        except json.JSONDecodeError:
-            analysis_data = {"error": "Failed to parse analysis", "raw": text}
-
-        return {
-            "analysis": analysis_data.get("summary", str(analysis_data)),
-            "data_analyzed": list(data.keys()),
-            "full_analysis": analysis_data,
-            "timestamp": datetime.utcnow().isoformat(),
-            "usage": response.usage,
-            "model": response.model,
-            "latency_ms": response.latency_ms,
-        }
 
 
 # =============================================================================

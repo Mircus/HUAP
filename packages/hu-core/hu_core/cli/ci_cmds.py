@@ -386,10 +386,9 @@ Place your trace files here for CI evaluation.
 ```
 suites/
 ├── smoke/           # Quick smoke tests
-│   ├── soma_plan.trace.jsonl
+│   ├── hello.trace.jsonl
 │   └── basic_tool.trace.jsonl
-├── integration/     # Full integration tests
-└── regression/      # Regression test baselines
+└── smoke/           # Quick smoke tests
 ```
 
 ## Adding Tests
