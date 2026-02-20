@@ -143,10 +143,10 @@ class ContractValidator:
         validator = ContractValidator()
 
         # Validate pod implementation
-        result = validator.validate_pod(MySomaPod)
+        result = validator.validate_pod(MyPod)
 
         # Validate trace file
-        result = validator.validate_trace("trace.jsonl", MySomaPod)
+        result = validator.validate_trace("trace.jsonl", MyPod)
     """
 
     def validate_pod(self, pod_class: Type[PodContract]) -> ValidationResult:

@@ -555,7 +555,7 @@ if HAS_CLICK:
             description=description,
             description_lower=description_lower,
         )
-        (package_dir / "pod.py").write_text(pod_content)
+        (package_dir / "pod.py").write_text(pod_content, encoding="utf-8")
         files_created.append(f"hu_{name}/pod.py")
 
         # __init__.py
@@ -564,7 +564,7 @@ if HAS_CLICK:
             class_name=class_name,
             description=description,
         )
-        (package_dir / "__init__.py").write_text(init_content)
+        (package_dir / "__init__.py").write_text(init_content, encoding="utf-8")
         files_created.append(f"hu_{name}/__init__.py")
 
         # pyproject.toml
@@ -572,7 +572,7 @@ if HAS_CLICK:
             name=name,
             description=description,
         )
-        (pod_dir / "pyproject.toml").write_text(pyproject_content)
+        (pod_dir / "pyproject.toml").write_text(pyproject_content, encoding="utf-8")
         files_created.append("pyproject.toml")
 
         # workflow YAML
@@ -581,11 +581,11 @@ if HAS_CLICK:
             name_title=name_title,
             description=description,
         )
-        (package_dir / f"{name}.yaml").write_text(workflow_content)
+        (package_dir / f"{name}.yaml").write_text(workflow_content, encoding="utf-8")
         files_created.append(f"hu_{name}/{name}.yaml")
 
         # tests/__init__.py
-        (tests_dir / "__init__.py").write_text("")
+        (tests_dir / "__init__.py").write_text("", encoding="utf-8")
         files_created.append("tests/__init__.py")
 
         # tests/test_pod.py
@@ -595,7 +595,7 @@ if HAS_CLICK:
             name_underscore=name_underscore,
             class_name=class_name,
         )
-        (tests_dir / f"test_{name}_pod.py").write_text(test_content)
+        (tests_dir / f"test_{name}_pod.py").write_text(test_content, encoding="utf-8")
         files_created.append(f"tests/test_{name}_pod.py")
 
         # Print summary

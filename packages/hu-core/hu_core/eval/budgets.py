@@ -158,10 +158,11 @@ class QualityBudget:
             actual = metrics.get(metric, 0.0)
             scores.append(min(actual / min_val, 1.0) if min_val > 0 else 1.0)
 
-        # Add preferred metrics scores
+        # Add preferred metrics scores (only if actually recorded in trace)
         for metric, target in self.preferred_metrics.items():
-            actual = metrics.get(metric, 0.0)
-            scores.append(min(actual / target, 1.0) if target > 0 else 1.0)
+            if metric in metrics:
+                actual = metrics[metric]
+                scores.append(min(actual / target, 1.0) if target > 0 else 1.0)
 
         # Penalty for tool errors
         if self.tool_errors_max > 0:

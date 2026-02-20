@@ -3,7 +3,7 @@
 This document defines the contracts that any HUAP-compatible implementation must satisfy.
 
 **Schema Versions:**
-- Trace Schema: `1.0`
+- Trace Schema: `0.1`
 - Workflow Schema: `1.0`
 - Interface Version: `1.0`
 

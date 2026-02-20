@@ -16,7 +16,7 @@ Usage:
         # ... implement other abstract methods
 
     # Validate pod implementation
-    result = validate_pod(MySomaPod)
+    result = validate_pod(MyPod)
     if not result.valid:
         for issue in result.issues:
             print(f"{issue.severity}: {issue.message}")

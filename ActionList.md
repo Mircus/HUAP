@@ -9,12 +9,13 @@ This list covers everything remaining to make the repo **adoption-ready**.
 
 ### 0.1 Remove SOMA contamination from core library ✅
 **Status:** Done
-Removed all SOMA/workout/health_data references from 14 files across core library.
+Removed all SOMA/workout/health_data references from 16 files across core library (including contracts).
 `grep -ri "soma\|workout\|health_data" packages/hu-core/hu_core/` returns 0 matches.
 
 ### 0.2 Add GitHub Actions CI ✅
 **Status:** Done
 Created `.github/workflows/ci.yml` — Python 3.10/3.11/3.12 matrix, ruff, pytest, stub smoke trace.
+CI badge added to README.
 
 ### 0.3 Publish to PyPI (or fix all "not yet on PyPI" claims)
 **Status:** Not started
@@ -37,10 +38,13 @@ Deleted `hello_workflow.yaml` (required pip install), kept `hello.yaml` (works f
 **Status:** Done
 `suites/smoke/hello_baseline.jsonl` committed. Replay exec + verify passes.
 
-### Bug fixes (discovered during P0 work)
+### Bug fixes (discovered during work)
 - **graph.py:** Skip edges with `null` targets (terminal nodes) instead of failing validation
 - **replay.py:** Fixed exec mode — was passing `graph=` instead of `graph_path=`, added graph path resolution
 - **trace schema:** Added `graph_path` field to `RunStartData` so replays can find the original graph file
+- **cli/main.py:** Fixed all `write_text()` calls to use `encoding="utf-8"` (Windows encoding crash)
+- **eval/budgets.py:** Fixed preferred metrics scoring — skip metrics not recorded in trace (was failing stub traces)
+- **CONFORMANCE.md:** Fixed Trace Schema version `1.0` → `0.1` (matching actual `v` field in models.py)
 
 ---
 
@@ -125,9 +129,11 @@ smoke:      HUAP_LLM_MODE=stub huap trace run hello examples/graphs/hello.yaml -
 
 - [x] Zero SOMA references in core library
 - [x] CI workflow added (GitHub Actions)
-- [ ] CI badge in README (needs first push to trigger)
+- [x] CI badge in README
 - [ ] `huap init && huap pod create hello && HUAP_LLM_MODE=stub huap trace run ...` works end-to-end
 - [x] One canonical hello example graph (no duplicates)
 - [x] Smoke baseline trace committed and replayable
 - [ ] On PyPI or docs consistently say "install from source"
 - [x] Tests cover graph loading, executor, pod create, trace run/replay
+- [x] Pod create works on Windows (UTF-8 encoding)
+- [x] Eval trace passes on stub traces (preferred metrics scoring fix)
