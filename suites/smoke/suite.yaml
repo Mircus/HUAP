@@ -1,0 +1,8 @@
+name: smoke
+scenarios:
+  - name: hello
+    pod: hello
+    graph: examples/graphs/hello.yaml
+    golden: suites/smoke/hello_baseline.jsonl
+    env:
+      HUAP_LLM_MODE: stub

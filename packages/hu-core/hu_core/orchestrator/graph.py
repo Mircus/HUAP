@@ -5,7 +5,9 @@ Pure Python, no external dependencies.
 """
 from __future__ import annotations
 
+import ast
 import logging
+import operator
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
@@ -43,11 +45,143 @@ class Edge:
         if self.condition is None:
             return True
         try:
-            # Safe evaluation with limited context
-            return bool(eval(self.condition, {"__builtins__": {}}, state))
+            return bool(safe_eval_condition(self.condition, state))
         except Exception as e:
             logger.warning(f"Edge condition '{self.condition}' failed: {e}")
             return False
+
+
+# ---------------------------------------------------------------------------
+# Safe condition evaluator (replaces eval)
+# ---------------------------------------------------------------------------
+
+_SAFE_BUILTINS = {"len": len, "min": min, "max": max, "abs": abs,
+                  "str": str, "int": int, "float": float, "bool": bool,
+                  "True": True, "False": False, "None": None}
+
+_CMP_OPS = {
+    ast.Eq: operator.eq, ast.NotEq: operator.ne,
+    ast.Lt: operator.lt, ast.LtE: operator.le,
+    ast.Gt: operator.gt, ast.GtE: operator.ge,
+    ast.Is: operator.is_, ast.IsNot: operator.is_not,
+    ast.In: lambda a, b: a in b,
+    ast.NotIn: lambda a, b: a not in b,
+}
+
+_BIN_OPS = {
+    ast.Add: operator.add, ast.Sub: operator.sub,
+    ast.Mult: operator.mul, ast.Div: operator.truediv,
+    ast.Mod: operator.mod,
+}
+
+_UNARY_OPS = {
+    ast.Not: operator.not_,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+
+class _SafeEvaluator(ast.NodeVisitor):
+    """Walk an AST and evaluate it against *state* with no dangerous ops."""
+
+    def __init__(self, state: Dict[str, Any]):
+        self.state = state
+
+    # -- atoms --
+    def visit_Constant(self, node: ast.Constant) -> Any:
+        return node.value
+
+    def visit_Name(self, node: ast.Name) -> Any:
+        name = node.id
+        if name in _SAFE_BUILTINS:
+            return _SAFE_BUILTINS[name]
+        if name in self.state:
+            return self.state[name]
+        raise ValueError(f"Unknown name: {name}")
+
+    def visit_List(self, node: ast.List) -> Any:
+        return [self.visit(e) for e in node.elts]
+
+    def visit_Tuple(self, node: ast.Tuple) -> Any:
+        return tuple(self.visit(e) for e in node.elts)
+
+    # -- operators --
+    def visit_Compare(self, node: ast.Compare) -> Any:
+        left = self.visit(node.left)
+        for op_node, comparator in zip(node.ops, node.comparators):
+            right = self.visit(comparator)
+            op_func = _CMP_OPS.get(type(op_node))
+            if op_func is None:
+                raise ValueError(f"Unsupported comparison: {type(op_node).__name__}")
+            if not op_func(left, right):
+                return False
+            left = right
+        return True
+
+    def visit_BoolOp(self, node: ast.BoolOp) -> Any:
+        if isinstance(node.op, ast.And):
+            return all(self.visit(v) for v in node.values)
+        if isinstance(node.op, ast.Or):
+            return any(self.visit(v) for v in node.values)
+        raise ValueError(f"Unsupported bool op: {type(node.op).__name__}")
+
+    def visit_UnaryOp(self, node: ast.UnaryOp) -> Any:
+        op_func = _UNARY_OPS.get(type(node.op))
+        if op_func is None:
+            raise ValueError(f"Unsupported unary op: {type(node.op).__name__}")
+        return op_func(self.visit(node.operand))
+
+    def visit_BinOp(self, node: ast.BinOp) -> Any:
+        op_func = _BIN_OPS.get(type(node.op))
+        if op_func is None:
+            raise ValueError(f"Unsupported binary op: {type(node.op).__name__}")
+        return op_func(self.visit(node.left), self.visit(node.right))
+
+    def visit_IfExp(self, node: ast.IfExp) -> Any:
+        return self.visit(node.body) if self.visit(node.test) else self.visit(node.orelse)
+
+    # -- subscript & attribute --
+    def visit_Subscript(self, node: ast.Subscript) -> Any:
+        value = self.visit(node.value)
+        sl = self.visit(node.slice)
+        return value[sl]
+
+    def visit_Attribute(self, node: ast.Attribute) -> Any:
+        if node.attr.startswith("_"):
+            raise ValueError(f"Access to private attribute '{node.attr}' is blocked")
+        value = self.visit(node.value)
+        return getattr(value, node.attr)
+
+    # -- calls (allowlisted only) --
+    def visit_Call(self, node: ast.Call) -> Any:
+        func = self.visit(node.func)
+        if func not in (len, min, max, abs, str, int, float, bool):
+            raise ValueError(f"Function call not allowed: {func}")
+        args = [self.visit(a) for a in node.args]
+        return func(*args)
+
+    # -- catch-all --
+    def generic_visit(self, node: ast.AST) -> Any:
+        raise ValueError(f"Unsupported expression: {type(node).__name__}")
+
+    # Override visit to handle Expression wrapper
+    def visit_Expression(self, node: ast.Expression) -> Any:
+        return self.visit(node.body)
+
+
+def safe_eval_condition(expr: str, state: Dict[str, Any]) -> bool:
+    """
+    Evaluate a condition expression safely using AST parsing.
+
+    Only allows comparisons, boolean ops, arithmetic, subscripts,
+    and a small set of allowlisted builtins (len, min, max, abs, str,
+    int, float, bool).
+
+    Raises ValueError on disallowed constructs (import, lambda, dunder access, etc.).
+    """
+    tree = ast.parse(expr, mode="eval")
+    evaluator = _SafeEvaluator(state)
+    return evaluator.visit(tree)
 
 
 @dataclass

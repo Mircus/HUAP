@@ -837,6 +837,78 @@ if HAS_CLICK:
             click.echo(f"Error copying examples: {e}", err=True)
             sys.exit(1)
 
+    @cli.command()
+    @click.option("--no-open", is_flag=True, help="Don't open report in browser")
+    def demo(no_open):
+        """Run a demo graph and produce a shareable HTML trace report."""
+        import asyncio
+        import webbrowser
+
+        # Find the examples/graphs/hello.yaml relative to the repo
+        pkg_root = Path(__file__).resolve().parents[2]  # hu_core -> packages/hu-core
+        repo_root = pkg_root.parent.parent  # packages -> repo
+        graph_path = repo_root / "examples" / "graphs" / "hello.yaml"
+
+        if not graph_path.exists():
+            click.echo(f"Error: Could not find {graph_path}", err=True)
+            click.echo("Run this command from the HUAP repo root.", err=True)
+            sys.exit(1)
+
+        # Set stub mode
+        os.environ["HUAP_LLM_MODE"] = "stub"
+
+        # Create output dir
+        demo_dir = Path("huap_demo")
+        demo_dir.mkdir(exist_ok=True)
+        trace_out = demo_dir / "hello.jsonl"
+        report_out = demo_dir / "hello.html"
+
+        click.echo("=" * 60)
+        click.echo("HUAP Demo")
+        click.echo("=" * 60)
+        click.echo("")
+        click.echo(f"Graph:  {graph_path}")
+        click.echo(f"Mode:   stub (deterministic, no API keys needed)")
+        click.echo("")
+
+        # Run the graph
+        orig_cwd = os.getcwd()
+        try:
+            os.chdir(str(repo_root))
+            from ..trace.runner import run_pod_graph
+            result = asyncio.run(run_pod_graph(
+                pod="hello",
+                graph_path=graph_path,
+                input_state={"message": "Hello from HUAP demo!"},
+                output_path=trace_out.resolve(),
+            ))
+        finally:
+            os.chdir(orig_cwd)
+
+        if result["status"] != "success":
+            click.echo(f"Error: {result.get('error', 'unknown')}", err=True)
+            sys.exit(1)
+
+        click.echo(f"Trace:  {trace_out} ({result['status']})")
+
+        # Generate HTML report
+        from ..trace.report import generate_report
+        generate_report(str(trace_out), str(report_out))
+        click.echo(f"Report: {report_out}")
+        click.echo("")
+
+        # Open in browser
+        if not no_open:
+            webbrowser.open(str(report_out.resolve()))
+            click.echo("Opened report in browser.")
+
+        click.echo("")
+        click.echo("Next steps:")
+        click.echo(f"  huap trace view {trace_out}")
+        click.echo(f"  huap eval trace {trace_out}")
+        click.echo(f"  huap ci run suites/smoke/suite.yaml --html reports/smoke.html")
+        click.echo("")
+
     @cli.command("version")
     def version():
         """Show HUAP CLI version."""

@@ -8,6 +8,7 @@ from hu_core.orchestrator.graph import (
     Node,
     Edge,
     load_graph_from_yaml,
+    safe_eval_condition,
     _noop_func,
 )
 from hu_core.orchestrator.executor import PodExecutor
@@ -62,6 +63,44 @@ class TestGraphRunner:
         runner = GraphRunner()
         with pytest.raises(ValueError, match="not found"):
             await runner.run("missing", {})
+
+
+# ---------------------------------------------------------------------------
+# Safe condition evaluator tests
+# ---------------------------------------------------------------------------
+
+class TestSafeEvalCondition:
+    def test_condition_simple_compare(self):
+        assert safe_eval_condition("status == 'success'", {"status": "success"}) is True
+        assert safe_eval_condition("status == 'success'", {"status": "fail"}) is False
+
+    def test_condition_boolean_ops(self):
+        assert safe_eval_condition("x > 0 and y < 10", {"x": 5, "y": 3}) is True
+        assert safe_eval_condition("x > 0 and y < 10", {"x": -1, "y": 3}) is False
+
+    def test_condition_no_condition(self):
+        edge = Edge(source="a", target="b", condition=None)
+        assert edge.evaluate_condition({}) is True
+
+    def test_condition_len_call(self):
+        assert safe_eval_condition("len(items) > 0", {"items": [1, 2, 3]}) is True
+        assert safe_eval_condition("len(items) > 0", {"items": []}) is False
+
+    def test_condition_in_operator(self):
+        assert safe_eval_condition("'admin' in roles", {"roles": ["admin", "user"]}) is True
+        assert safe_eval_condition("'admin' in roles", {"roles": ["user"]}) is False
+
+    def test_condition_blocks_import(self):
+        edge = Edge(source="a", target="b", condition="__import__('os')")
+        assert edge.evaluate_condition({}) is False
+
+    def test_condition_blocks_dunder(self):
+        edge = Edge(source="a", target="b", condition="x.__class__.__bases__")
+        assert edge.evaluate_condition({"x": 1}) is False
+
+    def test_condition_invalid_syntax(self):
+        edge = Edge(source="a", target="b", condition="!!!")
+        assert edge.evaluate_condition({}) is False
 
 
 # ---------------------------------------------------------------------------

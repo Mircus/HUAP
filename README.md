@@ -25,25 +25,35 @@ HUAP Core provides the foundational toolkit for building AI agent systems that a
 
 ---
 
-## 🚀 Quick Start (60 seconds)
+## 🚀 3-Minute Wow Path
+
+Five commands, copy-paste from repo root. No API keys needed.
 
 ```bash
-# Install from source (not yet on PyPI)
+# 1. Install from source
 pip install -e packages/hu-core
 
-# Option A: Create a full workspace (recommended)
-huap init demo && cd demo
-HUAP_LLM_MODE=stub huap trace run hello graphs/hello.yaml --out traces/hello.jsonl
+# 2. One-liner demo — runs a graph, generates an HTML report, opens it in your browser
+huap demo
 
-# Option B: Create a single pod
-huap pod create hello --description "My first agent"
-HUAP_LLM_MODE=stub huap trace run hello hu-hello/hu_hello/hello.yaml --out traces/hello.jsonl
+# 3. Diff two stub runs — proves deterministic replay catches drift
+HUAP_LLM_MODE=stub huap trace run hello examples/graphs/hello.yaml --out /tmp/a.jsonl
+HUAP_LLM_MODE=stub huap trace run hello examples/graphs/hello.yaml --out /tmp/b.jsonl
+huap trace diff /tmp/a.jsonl /tmp/b.jsonl
 
-# View, replay, evaluate
-huap trace view traces/hello.jsonl
-huap trace replay traces/hello.jsonl --mode exec --verify
-huap eval trace traces/hello.jsonl
+# 4. CI gate with baseline — runs suite, diffs vs golden, produces HTML report
+huap ci run suites/smoke/suite.yaml --html reports/smoke.html
+
+# 5. Shareable HTML artifact — standalone report you can send to anyone
+huap trace report /tmp/a.jsonl --out reports/trace.html
 ```
+
+| Command | What it proves |
+|---|---|
+| `huap demo` | Full graph → trace → HTML report pipeline works out of the box |
+| `huap trace diff` | Two identical stub runs produce zero drift |
+| `huap ci run` | Suite runner diffs against golden baselines and gates CI |
+| `huap trace report` | Any trace becomes a self-contained, shareable HTML artifact |
 
 ---
 

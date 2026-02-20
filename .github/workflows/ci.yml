@@ -35,3 +35,24 @@ jobs:
           export HUAP_LLM_MODE=stub
           huap trace run hello examples/graphs/hello.yaml --out /tmp/smoke.jsonl
           huap trace view /tmp/smoke.jsonl
+
+      - name: Golden path (init → run → report → diff → eval)
+        run: |
+          export HUAP_LLM_MODE=stub
+          huap init ci_demo
+          cd ci_demo
+          huap trace run hello graphs/hello.yaml --out traces/hello.jsonl
+          huap trace report traces/hello.jsonl --out reports/hello.html
+          huap trace run hello graphs/hello.yaml --out traces/hello_v2.jsonl
+          huap trace diff traces/hello.jsonl traces/hello_v2.jsonl
+          huap eval trace traces/hello.jsonl
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: huap-reports-${{ matrix.python-version }}
+          path: |
+            ci_demo/traces/*.jsonl
+            ci_demo/reports/*.html
+          retention-days: 14

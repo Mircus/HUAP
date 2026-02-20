@@ -419,16 +419,17 @@ huap ci check suites/smoke --budgets budgets/default.yaml
     @click.argument("suite", type=click.Path(exists=True))
     @click.option("--budgets", "-b", default=None, help="Budget config YAML file")
     @click.option("--out", "-o", default="reports", help="Output directory for reports")
-    def ci_run(suite: str, budgets: Optional[str], out: str):
+    @click.option("--html", default=None, help="Write HTML report to this path")
+    def ci_run(suite: str, budgets: Optional[str], out: str, html: Optional[str]):
         """
         Run a suite, diff against golden traces, evaluate budgets.
 
         Exits non-zero on regression or budget violation.
 
-        SUITE: Path to suite YAML file (e.g. suites/smoke/smoke.yaml)
+        SUITE: Path to suite YAML file (e.g. suites/smoke/suite.yaml)
 
         Example:
-            huap ci run suites/smoke/smoke.yaml --budgets budgets/cheap.yaml --out reports/
+            huap ci run suites/smoke/suite.yaml --budgets budgets/cheap.yaml --out reports/
         """
         from ..ci.runner import CIRunner
 
@@ -459,6 +460,13 @@ huap ci check suites/smoke --budgets budgets/default.yaml
                     click.echo(f"        eval: {issue}")
             if s.error:
                 click.echo(f"        error: {s.error[:200]}")
+
+        # Write HTML report if requested
+        if html:
+            html_path = Path(html)
+            html_path.parent.mkdir(parents=True, exist_ok=True)
+            html_path.write_text(report.to_html(), encoding="utf-8")
+            click.echo(f"\nHTML report: {html_path}")
 
         click.echo("")
         click.echo("=" * 60)
