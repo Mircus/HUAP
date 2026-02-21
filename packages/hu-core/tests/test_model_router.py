@@ -7,7 +7,6 @@ Covers:
 - Capability filtering
 - Fallback to stub
 """
-import os
 import pytest
 
 from hu_core.services.model_registry import ModelRegistry, ModelSpec, BUILTIN_MODELS

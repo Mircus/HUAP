@@ -10,14 +10,12 @@ Hindsight API integration is pending.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from .base import (
     MemoryProvider,
     MemoryEntry,
     MemoryQuery,
-    MemoryType,
-    MemoryStatus,
 )
 
 logger = logging.getLogger("huap.memory.hindsight")

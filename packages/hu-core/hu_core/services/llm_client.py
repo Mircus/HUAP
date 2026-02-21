@@ -8,7 +8,6 @@ Provides:
 from __future__ import annotations
 import os
 import json
-from datetime import datetime
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -154,10 +153,8 @@ class LLMClient:
     def _generate_stub_response(self, messages: List[Dict[str, str]]) -> str:
         """Generate a deterministic stub response for testing."""
         # Look at the last user message to determine response type
-        last_user = ""
         for msg in reversed(messages):
             if msg.get("role") == "user":
-                last_user = msg.get("content", "").lower()
                 break
 
         # Generic stub response
@@ -276,7 +273,6 @@ class RoutedLLMClient:
         capability: str = "chat",
     ) -> LLMResponse:
         """Route to the best model, call the provider, and trace the decision."""
-        import time
 
         # Force stub when HUAP_LLM_MODE=stub
         if self._stub_mode:
@@ -339,7 +335,7 @@ class RoutedLLMClient:
 # CONTEXT-AWARE CLIENT ACCESS
 # =============================================================================
 
-from contextvars import ContextVar
+from contextvars import ContextVar  # noqa: E402
 
 # Context-local client (for concurrent run isolation)
 _context_client: ContextVar[Optional[LLMClient]] = ContextVar(

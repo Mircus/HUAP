@@ -44,7 +44,7 @@ def _extract_summary(events: List[Dict[str, Any]]) -> Dict[str, Any]:
     for evt in events:
         name = evt.get("name", "")
         data = evt.get("data", {})
-        kind = evt.get("kind", "")
+        evt.get("kind", "")
 
         if not summary["run_id"]:
             summary["run_id"] = evt.get("run_id", "")

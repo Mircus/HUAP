@@ -9,7 +9,7 @@ This module provides validation for:
 See docs/POD_CONTRACT_v0.1.md for full specification.
 """
 
-from typing import Dict, Any, List, Optional, Set, Type, Tuple
+from typing import Dict, Any, List, Optional, Set, Type
 from dataclasses import dataclass, field
 from enum import Enum
 import json
@@ -20,7 +20,6 @@ from ._base import (
     REQUIRED_TRACE_EVENTS,
     RECOMMENDED_TRACE_EVENTS,
     ToolDeclaration,
-    TraceRequirement,
 )
 
 
@@ -240,21 +239,21 @@ class ContractValidator:
             result.add_info("EMPTY_SCHEMA", "Pod schema has no fields defined")
 
         # Validate each field
-        for i, field in enumerate(schema.fields):
-            if not isinstance(field, dict):
+        for i, fld in enumerate(schema.fields):
+            if not isinstance(fld, dict):
                 result.add_error(
                     "INVALID_FIELD",
                     f"Field {i} is not a dictionary"
                 )
                 continue
 
-            if "name" not in field:
+            if "name" not in fld:
                 result.add_error("FIELD_MISSING_NAME", f"Field {i} has no 'name'")
 
-            if "type" not in field:
+            if "type" not in fld:
                 result.add_error(
                     "FIELD_MISSING_TYPE",
-                    f"Field {i} ({field.get('name', '?')}) has no 'type'"
+                    f"Field {i} ({fld.get('name', '?')}) has no 'type'"
                 )
 
     def _validate_capabilities(self, pod: PodContract, result: ValidationResult) -> None:

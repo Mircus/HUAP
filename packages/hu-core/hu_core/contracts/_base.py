@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 if TYPE_CHECKING:
-    from ..trace import TraceService
+    pass
 
 
 # =============================================================================

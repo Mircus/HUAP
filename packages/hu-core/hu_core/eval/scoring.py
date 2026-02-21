@@ -14,8 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from ..trace.models import TraceRun, EventKind, EventName
-from .budgets import BudgetConfig, CostBudget, QualityBudget, get_default_budget_config
+from ..trace.models import TraceRun, EventName
+from .budgets import BudgetConfig, get_default_budget_config
 
 
 @dataclass

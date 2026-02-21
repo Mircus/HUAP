@@ -160,7 +160,7 @@ _original_callbacks: Dict[str, Any] = {}
 def _patch_crewai(tracer: _CrewAITracer) -> None:
     """Best-effort: hook into CrewAI callbacks if available."""
     try:
-        from crewai import Agent  # type: ignore
+        from crewai import Agent  # type: ignore  # noqa: F401
         # Store tracer on module for callback access
         _original_callbacks["_tracer"] = tracer
     except ImportError:

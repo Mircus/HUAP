@@ -4,7 +4,7 @@ HUAP Persistence Interfaces.
 Abstract base classes for storage backends.
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class TraceStore(ABC):

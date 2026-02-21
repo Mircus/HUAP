@@ -34,7 +34,7 @@ from .models import (
     generate_run_id,
     generate_span_id,
 )
-from .writer import TraceWriter, NullTraceWriter
+from .writer import TraceWriter
 
 logger = logging.getLogger(__name__)
 
@@ -725,7 +725,7 @@ class TraceService:
 # CONTEXT-AWARE SERVICE ACCESS
 # =============================================================================
 
-from contextvars import ContextVar
+from contextvars import ContextVar  # noqa: E402
 
 # Context-local tracer (for concurrent run isolation)
 _context_tracer: ContextVar[Optional[TraceService]] = ContextVar(

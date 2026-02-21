@@ -11,7 +11,7 @@ This module handles:
 import yaml
 import json
 import inspect
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
 from importlib import import_module
@@ -100,7 +100,7 @@ class PodRegistry:
 
             try:
                 # Import pod package to validate it exists
-                pod_package = import_module(pod_config['package'])
+                import_module(pod_config['package'])
 
                 # Create Pod object
                 pod = Pod(

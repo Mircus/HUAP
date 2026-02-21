@@ -13,7 +13,7 @@ import sys
 import importlib
 import inspect
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 # Try to import click, fall back to argparse if not available
 try:
@@ -25,8 +25,6 @@ except ImportError:
 
 from ..contracts import PodContract, PodSchema
 from ..contracts.validation import (
-    ContractValidator,
-    ValidationResult as ContractValidationResult,
     validate_pod as contract_validate_pod,
     validate_trace as contract_validate_trace,
 )
@@ -645,7 +643,7 @@ if HAS_CLICK:
             click.echo(f"Error: Could not load pod 'hu_{name}'", err=True)
             click.echo("\nMake sure:")
             click.echo(f"  - The package 'hu_{name}' is installed or in PYTHONPATH")
-            click.echo(f"  - The package has a get_pod() function")
+            click.echo("  - The package has a get_pod() function")
             sys.exit(1)
 
         # Validate pod implementation using new contract validator
@@ -791,7 +789,6 @@ if HAS_CLICK:
             huap examples copy --output ./my-project
         """
         import shutil
-        from importlib.resources import files
 
         output_path = Path(output)
 
@@ -868,7 +865,7 @@ if HAS_CLICK:
         click.echo("=" * 60)
         click.echo("")
         click.echo(f"Graph:  {graph_path}")
-        click.echo(f"Mode:   stub (deterministic, no API keys needed)")
+        click.echo("Mode:   stub (deterministic, no API keys needed)")
         click.echo("")
 
         # Run the graph
@@ -906,7 +903,7 @@ if HAS_CLICK:
         click.echo("Next steps:")
         click.echo(f"  huap trace view {trace_out}")
         click.echo(f"  huap eval trace {trace_out}")
-        click.echo(f"  huap ci run suites/smoke/suite.yaml --html reports/smoke.html")
+        click.echo("  huap ci run suites/smoke/suite.yaml --html reports/smoke.html")
         click.echo("")
 
     @cli.command("version")

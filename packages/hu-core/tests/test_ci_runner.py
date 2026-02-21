@@ -6,12 +6,7 @@ Covers:
 - Passes when identical to golden
 - Budgets enforced
 """
-import json
-import os
-import tempfile
-from pathlib import Path
 
-import pytest
 
 
 class TestCIRunnerReport:

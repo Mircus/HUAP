@@ -10,13 +10,12 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable, Awaitable
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 
 from .models import (
     TraceEvent,
     TraceRun,
-    EventKind,
     EventName,
     hash_data,
     generate_run_id,
@@ -464,14 +463,12 @@ class TraceReplayer:
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Create stubbed LLM client if needed
-        stubbed_llm = None
         if self.stub_llm:
-            stubbed_llm = StubbedLLMClient(stubs)
+            StubbedLLMClient(stubs)
 
         # Create stubbed tool registry if needed
-        stubbed_tools = None
         if self.stub_tools:
-            stubbed_tools = StubbedToolRegistry(stubs)
+            StubbedToolRegistry(stubs)
 
         # Run the actual workflow with stubs
         errors = []

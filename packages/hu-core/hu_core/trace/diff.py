@@ -416,21 +416,21 @@ class TraceDiffer:
         # Compare relevant fields based on event type
         compare_fields = self._get_compare_fields(baseline.name)
 
-        for field in compare_fields:
-            b_val = b_data.get(field)
-            c_val = c_data.get(field)
+        for fld in compare_fields:
+            b_val = b_data.get(fld)
+            c_val = c_data.get(fld)
 
             if b_val != c_val:
                 # Skip hash differences (these are expected for different inputs)
-                if field.endswith("_hash"):
+                if fld.endswith("_hash"):
                     continue
                 # Skip duration differences within tolerance
-                if field == "duration_ms":
+                if fld == "duration_ms":
                     if b_val and c_val:
                         # Allow 50% variance in duration
                         if abs(b_val - c_val) / max(b_val, 1) < 0.5:
                             continue
-                changes[field] = (b_val, c_val)
+                changes[fld] = (b_val, c_val)
 
         return changes
 
@@ -591,8 +591,8 @@ class TraceDiffer:
         # Summary
         lines.append("## Summary")
         lines.append("")
-        lines.append(f"| Metric | Baseline | Candidate |")
-        lines.append(f"|--------|----------|-----------|")
+        lines.append("| Metric | Baseline | Candidate |")
+        lines.append("|--------|----------|-----------|")
         lines.append(f"| Run ID | `{diff_result.get('baseline_run_id', 'N/A')[:12]}...` | `{diff_result.get('candidate_run_id', 'N/A')[:12]}...` |")
         lines.append(f"| Events | {diff_result.get('baseline_event_count', 0)} | {diff_result.get('candidate_event_count', 0)} |")
         lines.append("")
@@ -619,8 +619,8 @@ class TraceDiffer:
         lines.append("")
         lines.append(f"**Severity:** `{cost_sev.upper()}`")
         lines.append("")
-        lines.append(f"| Metric | Baseline | Candidate | Delta |")
-        lines.append(f"|--------|----------|-----------|-------|")
+        lines.append("| Metric | Baseline | Candidate | Delta |")
+        lines.append("|--------|----------|-----------|-------|")
         lines.append(f"| Tokens | {cost.get('baseline_tokens', 0):,} | {cost.get('candidate_tokens', 0):,} | {cost.get('tokens_delta', 0):+,} |")
         lines.append(f"| USD | ${cost.get('baseline_usd', 0):.4f} | ${cost.get('candidate_usd', 0):.4f} | ${cost.get('usd_delta', 0):+.4f} |")
         lines.append(f"| Latency (ms) | {cost.get('baseline_latency_ms', 0):.1f} | {cost.get('candidate_latency_ms', 0):.1f} | {cost.get('latency_delta_ms', 0):+.1f} |")
@@ -631,8 +631,8 @@ class TraceDiffer:
         if quality:
             lines.append("## Quality Delta")
             lines.append("")
-            lines.append(f"| Metric | Delta |")
-            lines.append(f"|--------|-------|")
+            lines.append("| Metric | Delta |")
+            lines.append("|--------|-------|")
             for metric, delta in quality.items():
                 lines.append(f"| {metric} | {delta:+.2f} |")
             lines.append("")

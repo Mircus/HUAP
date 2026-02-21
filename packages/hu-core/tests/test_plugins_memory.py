@@ -1,5 +1,4 @@
 """Tests for P9 — Plugin SDK, MemoryPort, ingest policy, CMP toolpack."""
-import json
 import pytest
 from pathlib import Path
 
@@ -7,7 +6,7 @@ from hu_core.plugins.spec import PluginSpec
 from hu_core.plugins.registry import PluginRegistry
 from hu_core.ports.memory import InMemoryPort, MemoryItem
 from hu_core.tools.memory_tools import memory_retain, memory_recall, memory_reflect
-from hu_core.policies.memory_ingest import MemoryIngestPolicy, IngestDecision
+from hu_core.policies.memory_ingest import MemoryIngestPolicy
 
 
 # ═══════════════════════════════════════════════════════════════════════════

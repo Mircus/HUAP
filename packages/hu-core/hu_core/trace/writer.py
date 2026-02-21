@@ -5,7 +5,6 @@ Provides TraceWriter class for writing trace events to JSONL files.
 """
 from __future__ import annotations
 
-import os
 import logging
 from datetime import datetime
 from pathlib import Path

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 
 try:
     import click
@@ -200,7 +200,7 @@ if HAS_CLICK:
         Example:
             huap trace diff baseline.jsonl candidate.jsonl --out diff.md
         """
-        click.echo(f"Comparing traces:")
+        click.echo("Comparing traces:")
         click.echo(f"  Baseline:  {baseline}")
         click.echo(f"  Candidate: {candidate}")
 
@@ -229,7 +229,7 @@ if HAS_CLICK:
             output_path.write_text(output, encoding="utf-8")
 
             click.echo(f"\nDiff saved to: {output_path}")
-            click.echo(f"\nSummary:")
+            click.echo("\nSummary:")
             click.echo(f"  Events in baseline: {diff_result.get('baseline_event_count', 0)}")
             click.echo(f"  Events in candidate: {diff_result.get('candidate_event_count', 0)}")
             click.echo(f"  Added events: {len(diff_result.get('added', []))}")
@@ -239,7 +239,7 @@ if HAS_CLICK:
             # Cost delta
             cost_delta = diff_result.get('cost_delta', {})
             if cost_delta:
-                click.echo(f"\nCost Delta:")
+                click.echo("\nCost Delta:")
                 click.echo(f"  Tokens: {cost_delta.get('tokens_delta', 0):+d}")
                 click.echo(f"  USD: ${cost_delta.get('usd_delta', 0):+.4f}")
                 click.echo(f"  Latency: {cost_delta.get('latency_delta_ms', 0):+.1f}ms")
@@ -247,7 +247,7 @@ if HAS_CLICK:
             # Quality delta
             quality_delta = diff_result.get('quality_delta', {})
             if quality_delta:
-                click.echo(f"\nQuality Delta:")
+                click.echo("\nQuality Delta:")
                 for metric, delta in quality_delta.items():
                     click.echo(f"  {metric}: {delta:+.2f}")
 

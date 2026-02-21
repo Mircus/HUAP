@@ -9,8 +9,6 @@ from hu_core.runtime.human_gate import (
     get_decision,
     list_gates,
     gate_trace_event,
-    GateRequest,
-    GateDecision,
 )
 
 

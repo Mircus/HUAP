@@ -3,7 +3,7 @@ LLM Call Tool - Call language models with prompts.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from ..base import BaseTool, ExecutionContext, ToolCategory, ToolSpec
 

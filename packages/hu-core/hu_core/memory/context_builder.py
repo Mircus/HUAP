@@ -16,9 +16,8 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from .providers.base import MemoryProvider, MemoryEntry, MemoryType
 
@@ -258,7 +257,7 @@ class ContextBuilder:
     def _process_event(self, event: Dict[str, Any], context: ContextData) -> None:
         """Process a single trace event and extract context."""
         name = event.get("name", "")
-        kind = event.get("kind", "")
+        event.get("kind", "")
         data = event.get("data", {})
         ts = event.get("ts", "")
         pod = event.get("pod")

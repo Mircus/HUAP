@@ -4,7 +4,7 @@ Stub provider — deterministic canned responses for testing / CI.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from .base import BaseProvider, ProviderResponse
 

@@ -3,7 +3,6 @@ HTTP Fetch Tool - Make HTTP requests.
 """
 from __future__ import annotations
 
-import asyncio
 from typing import Any, Dict, List, Optional
 
 from ..base import BaseTool, ExecutionContext, ToolCategory, ToolSpec

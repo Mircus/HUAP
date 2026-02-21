@@ -490,14 +490,14 @@ class ToolRegistry:
         logs = self._execution_logs
 
         if tool_name:
-            logs = [l for l in logs if l.tool_name == tool_name]
+            logs = [entry for entry in logs if entry.tool_name == tool_name]
         if pod_name:
-            logs = [l for l in logs if l.pod_name == pod_name]
+            logs = [entry for entry in logs if entry.pod_name == pod_name]
         if status:
-            logs = [l for l in logs if l.status == status]
+            logs = [entry for entry in logs if entry.status == status]
 
         # Return most recent first
-        return [l.to_dict() for l in reversed(logs[-limit:])]
+        return [entry.to_dict() for entry in reversed(logs[-limit:])]
 
     def on_execute(self, callback: Callable[[ToolExecutionLog], None]) -> None:
         """Register a callback to be called after each tool execution."""
@@ -532,7 +532,7 @@ class ToolRegistry:
 # CONTEXT-AWARE REGISTRY ACCESS
 # =============================================================================
 
-from contextvars import ContextVar
+from contextvars import ContextVar  # noqa: E402
 
 # Context-local registry (for concurrent run isolation)
 _context_registry: ContextVar[Optional[ToolRegistry]] = ContextVar(

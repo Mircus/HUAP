@@ -12,7 +12,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
 
 from hu_core.trace.wrap import wrap_command
 

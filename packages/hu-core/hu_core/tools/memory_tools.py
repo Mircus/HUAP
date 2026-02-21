@@ -11,9 +11,9 @@ Tools:
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from ..ports.memory import MemoryPort, InMemoryPort, MemoryItem
+from ..ports.memory import MemoryPort, InMemoryPort
 
 
 def _get_port(port: Optional[MemoryPort] = None) -> MemoryPort:

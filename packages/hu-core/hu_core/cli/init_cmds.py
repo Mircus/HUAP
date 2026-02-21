@@ -240,9 +240,9 @@ if HAS_CLICK:
         click.echo("")
         click.echo("Next steps:")
         click.echo(f"  cd {name}")
-        click.echo(f"  pip install -e ../packages/hu-core")
-        click.echo(f"  HUAP_LLM_MODE=stub huap trace run hello graphs/hello.yaml --out traces/hello.jsonl")
-        click.echo(f"  huap trace view traces/hello.jsonl")
+        click.echo("  pip install -e ../packages/hu-core")
+        click.echo("  HUAP_LLM_MODE=stub huap trace run hello graphs/hello.yaml --out traces/hello.jsonl")
+        click.echo("  huap trace view traces/hello.jsonl")
 
 else:
     def init():

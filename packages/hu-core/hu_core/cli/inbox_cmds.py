@@ -20,7 +20,6 @@ import click
 from ..runtime.human_gate import (
     list_gates,
     submit_decision,
-    _request_path,
     _decision_path,
 )
 
@@ -115,7 +114,7 @@ def inbox_show(gate_id: str, run_id: Optional[str], root: Optional[str]):
 def inbox_approve(gate_id: str, run_id: Optional[str], note: str, root: Optional[str]):
     """Approve a pending gate."""
     rid = _resolve_run_id(gate_id, run_id, root)
-    dec = submit_decision(rid, gate_id, "approve", note=note, root=root)
+    submit_decision(rid, gate_id, "approve", note=note, root=root)
     click.echo(f"Approved gate '{gate_id}' (run {rid})")
     if note:
         click.echo(f"  Note: {note}")
@@ -131,7 +130,7 @@ def inbox_approve(gate_id: str, run_id: Optional[str], note: str, root: Optional
 def inbox_reject(gate_id: str, run_id: Optional[str], note: str, root: Optional[str]):
     """Reject a pending gate."""
     rid = _resolve_run_id(gate_id, run_id, root)
-    dec = submit_decision(rid, gate_id, "reject", note=note, root=root)
+    submit_decision(rid, gate_id, "reject", note=note, root=root)
     click.echo(f"Rejected gate '{gate_id}' (run {rid})")
     if note:
         click.echo(f"  Note: {note}")
@@ -157,7 +156,7 @@ def inbox_edit(gate_id: str, run_id: Optional[str], json_path: Optional[str],
             sys.exit(1)
         patch = json.loads(p.read_text(encoding="utf-8"))
 
-    dec = submit_decision(rid, gate_id, "edit", note=note, patch=patch, root=root)
+    submit_decision(rid, gate_id, "edit", note=note, patch=patch, root=root)
     click.echo(f"Edited gate '{gate_id}' (run {rid})")
 
 

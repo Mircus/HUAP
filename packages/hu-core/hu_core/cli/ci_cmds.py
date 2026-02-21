@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 import json
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
 
 try:
@@ -57,7 +57,7 @@ if HAS_CLICK:
         """
         import asyncio
         from ..eval import BudgetConfig, SuiteRunner, get_default_budget_config
-        from ..trace import TraceReplayer, TraceDiffer
+        from ..trace import TraceReplayer
 
         start_time = datetime.utcnow()
         suite_path = Path(suite)
@@ -141,7 +141,7 @@ if HAS_CLICK:
 
                     if result.get("state_hash_match"):
                         if verbose:
-                            click.echo(f"  PASS - State hash matches")
+                            click.echo("  PASS - State hash matches")
                     else:
                         click.echo(f"  FAIL - State hash mismatch: {trace_file.name}", err=True)
                         ci_results["passed"] = False
@@ -244,7 +244,7 @@ if HAS_CLICK:
 
         if not reports_path.exists():
             click.echo("No CI reports found.", err=True)
-            click.echo(f"Run 'huap ci check' first to generate reports.")
+            click.echo("Run 'huap ci check' first to generate reports.")
             sys.exit(1)
 
         # Find most recent ci_results.json
