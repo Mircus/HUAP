@@ -53,40 +53,41 @@ One-liner: runs hello graph in stub mode → generates HTML report → opens bro
 
 ---
 
-## Ship Sprint — Final Beta Push (in progress)
+## Ship Sprint ✅ COMPLETE
 
-### S1. Fix pod template & verify end-to-end flow
+### S1. Fix pod template & verify end-to-end flow ✅
+Fixed POD_TEMPLATE indentation — node functions at module level, class methods inside class.
+Verified: `pod create → install → trace run → success (Grade A)`.
+
+### S2. Makefile ✅
+`Makefile` with install, test, lint, smoke, demo, ci, clean targets.
+
+### S3. PyPI publish — ⏳ BLOCKED on credentials
+Build artifacts ready (`sdist + wheel`). `pyproject.toml` fixed (SPDX license, README).
+**Next:** Mirco gets PyPI credentials → `twine upload dist/*` → verify clean install.
+
+### S4. CHANGELOG.md ✅
+Created for v0.1.0b1.
+
+### S5. GETTING_STARTED.md refresh ✅
+Rewritten to match current CLI and demo flow.
+
+---
+
+## P1 — Next up (Monday)
+
+### 1.1 PyPI publish
+**Status:** Blocked — waiting for Mirco's PyPI credentials/token.
+- [ ] `twine upload dist/*`
+- [ ] Verify `pip install huap-core && huap demo` from clean venv
+
+### 1.2 Real Hindsight memory backend
 **Status:** Not started
-**Why:** `huap pod create hello && huap trace run ...` must work without manual fixup.
-The POD_TEMPLATE has node functions defined at wrong indentation (inside class body string but outside class).
-
-- [ ] Fix POD_TEMPLATE indentation — node functions should be module-level
-- [ ] Verify full flow: `pod create → trace run → trace view → eval`
-
-**Acceptance:** `huap pod create test && HUAP_LLM_MODE=stub huap trace run test hu-test/hu_test/test.yaml --out /tmp/test.jsonl` works.
-
-### S2. Makefile
-**Status:** Not started
-
-- [ ] Create `Makefile` with: install, test, lint, smoke, demo, ci targets
-
-### S3. PyPI publish
-**Status:** Not started
-**Why:** `pip install huap-core` is the bar for adoption.
-
-- [ ] `python -m build && twine upload`
-- [ ] Verify `pip install huap-core && huap demo` works from clean venv
-
-### S4. CHANGELOG.md
-**Status:** Not started
-
-- [ ] Create CHANGELOG.md covering v0.1.0b1
-
-### S5. GETTING_STARTED.md refresh
-**Status:** Not started
-**Why:** Currently references old patterns; should match the "3-min wow path".
-
-- [ ] Rewrite to match current CLI and demo flow
+**Why:** Current `HindsightProvider` is a stub (in-memory only, `connect()` returns False).
+`MemoryPort` interface is solid; needs a real persistent implementation.
+- [ ] Decide backend: SQLite? vector store? filesystem?
+- [ ] Implement real `retain/recall/reflect` with persistence
+- [ ] Tests for persistence across sessions
 
 ---
 
@@ -97,7 +98,7 @@ The POD_TEMPLATE has node functions defined at wrong indentation (inside class b
 ### 2.3 More framework adapters (LlamaIndex, AutoGen, Semantic Kernel)
 ### 2.4 Policy pipeline (deny tool calls, `huap policy explain`)
 ### 2.5 Web UI for inbox
-### 2.6 More memory backends (SQLite, vector stores)
+### 2.6 More memory backends (vector stores, cloud-hosted)
 
 ---
 
@@ -111,8 +112,8 @@ The POD_TEMPLATE has node functions defined at wrong indentation (inside class b
 - [x] Suite runner with HTML reports
 - [x] 96 tests passing
 - [x] Smoke baseline committed
-- [ ] `huap pod create → trace run` works end-to-end
-- [ ] On PyPI (`pip install huap-core`)
-- [ ] Makefile for contributors
-- [ ] CHANGELOG.md
-- [ ] GETTING_STARTED.md matches current CLI
+- [x] `huap pod create → trace run` works end-to-end
+- [x] Makefile for contributors
+- [x] CHANGELOG.md
+- [x] GETTING_STARTED.md matches current CLI
+- [ ] On PyPI (`pip install huap-core`) — blocked on credentials
