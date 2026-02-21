@@ -88,23 +88,6 @@ class {class_name}Pod(PodContract):
             "latest_session": sessions[-1].get("session_start") if sessions else None,
         }}
 
-
-# ── Node functions referenced by WORKFLOW_TEMPLATE ──────────────────────
-
-def start_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Initialize the workflow."""
-    return {{"status": "started"}}
-
-
-def process_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Process input data."""
-    return {{"status": "processed"}}
-
-
-def end_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Finalize the workflow."""
-    return {{"status": "completed"}}
-
     def get_system_prompt(self) -> str:
         """Return the system prompt for single-pod AI analysis."""
         return (
@@ -130,6 +113,23 @@ def end_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "session_tracking",
             "ai_coaching",
         ]
+
+
+# ── Node functions referenced by WORKFLOW_TEMPLATE ──────────────────────
+
+def start_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Initialize the workflow."""
+    return {{"status": "started"}}
+
+
+def process_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Process input data."""
+    return {{"status": "processed"}}
+
+
+def end_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """Finalize the workflow."""
+    return {{"status": "completed"}}
 
 
 # Singleton instance

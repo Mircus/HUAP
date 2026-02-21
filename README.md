@@ -30,8 +30,9 @@ HUAP Core provides the foundational toolkit for building AI agent systems that a
 Five commands, copy-paste from repo root. No API keys needed.
 
 ```bash
-# 1. Install from source
-pip install -e packages/hu-core
+# 1. Install (PyPI or from source)
+pip install huap-core              # PyPI
+# pip install -e packages/hu-core  # or from source
 
 # 2. One-liner demo — runs a graph, generates an HTML report, opens it in your browser
 huap demo

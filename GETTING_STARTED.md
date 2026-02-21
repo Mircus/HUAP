@@ -1,6 +1,6 @@
 # Getting Started with HUAP Core
 
-This guide walks you through building and testing your first HUAP agent.
+This guide walks you through HUAP in 5 minutes — from install to CI-gated traces.
 
 ---
 
@@ -14,12 +14,17 @@ This guide walks you through building and testing your first HUAP agent.
 ## Installation
 
 ```bash
-# Install from source (not yet on PyPI)
+pip install huap-core
+```
+
+Or install from source:
+
+```bash
 git clone https://github.com/Mircus/HUAP.git && cd HUAP
 pip install -e packages/hu-core
 ```
 
-Verify installation:
+Verify:
 
 ```bash
 huap version
@@ -27,7 +32,19 @@ huap version
 
 ---
 
-## Step 1: Create a Pod
+## Step 1: Run the Demo
+
+The fastest way to see HUAP in action — one command, no API keys:
+
+```bash
+huap demo
+```
+
+This runs the built-in hello graph in stub mode, generates an HTML trace report, and opens it in your browser.
+
+---
+
+## Step 2: Create Your Own Pod
 
 A pod is a self-contained agent with tools and workflows.
 
@@ -40,95 +57,66 @@ This creates:
 hu-myagent/
 ├── hu_myagent/
 │   ├── __init__.py
-│   ├── pod.py          # Your pod implementation
-│   └── myagent.yaml    # Workflow definition (nodes[] + edges[] spec)
+│   ├── pod.py          # Pod class + node functions
+│   └── myagent.yaml    # Workflow (nodes[] + edges[])
 ├── tests/
 │   └── test_myagent_pod.py
 └── pyproject.toml
 ```
 
-The generated workflow YAML uses the **runnable `nodes[]` + `edges[]` spec**.
-Each node's `run:` field points to an importable Python function.
-
----
-
-## Step 2: Run a Workflow with Tracing
-
-Run the example workflow to generate a trace:
+Install and run it:
 
 ```bash
-# Run with stub mode (no API key needed)
-export HUAP_LLM_MODE=stub
-
-huap trace run hello examples/graphs/hello.yaml --out traces/hello.jsonl
-```
-
-Output:
-```
-Running pod 'hello' with graph 'examples/graphs/hello.yaml'...
-
-Trace saved to: traces/hello.jsonl
-Run ID: run_abc123
-Status: success
-Duration: 25.3ms
+pip install -e hu-myagent
+HUAP_LLM_MODE=stub huap trace run myagent hu-myagent/hu_myagent/myagent.yaml --out traces/myagent.jsonl
 ```
 
 ---
 
-## Step 3: View a Trace
+## Step 3: Explore the Trace
 
 ```bash
-huap trace view traces/hello.jsonl
+huap trace view traces/myagent.jsonl
 ```
 
-Output:
-```
-Run ID: run_abc123
-Total events: 8
-
-[00:00:00.000] system/run_start
-  span: sp-000
-  pod: hello
-  graph: hello
-
-[00:00:00.010] node/node_enter
-  span: sp-001
-  node: start
-...
-```
-
----
-
-## Step 4: Replay & Verify
-
-Replay re-emits the same trace events:
+Generate a shareable HTML report:
 
 ```bash
-huap trace replay examples/traces/golden_hello.jsonl --mode exec --verify
+huap trace report traces/myagent.jsonl --out reports/myagent.html
 ```
 
-Output:
-```
-Replay saved to: examples/traces/golden_hello.replay.jsonl
-Verification: PASSED (state hashes match)
+Evaluate cost and quality:
+
+```bash
+huap eval trace traces/myagent.jsonl
 ```
 
 ---
 
-## Step 5: Add a Node to Your Workflow
+## Step 4: Diff Two Runs
 
-Add a node function to `hu_myagent/pod.py`:
+Run the same graph twice and compare:
+
+```bash
+HUAP_LLM_MODE=stub huap trace run myagent hu-myagent/hu_myagent/myagent.yaml --out traces/v2.jsonl
+huap trace diff traces/myagent.jsonl traces/v2.jsonl
+```
+
+Identical stub runs produce zero drift — proving determinism.
+
+---
+
+## Step 5: Add a Custom Node
+
+Add a function to `hu_myagent/pod.py`:
 
 ```python
-from typing import Any, Dict
-
 def greet_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Greet a user by name."""
     name = state.get("name", "World")
     return {"greeting": f"Hello, {name}!"}
 ```
 
-Then reference it in your workflow YAML:
+Reference it in your workflow YAML:
 
 ```yaml
 nodes:
@@ -139,72 +127,35 @@ nodes:
 
 ---
 
-## Step 6: Diff Two Traces
+## Step 6: CI Integration
 
-Compare baseline and candidate traces:
-
-```bash
-huap trace diff baseline.jsonl candidate.jsonl
-```
-
-Output:
-```
-Summary:
-  Events in baseline: 12
-  Events in candidate: 14
-  Added events: 2
-  Changed events: 1
-
-No regressions detected.
-```
-
----
-
-## Step 7: Evaluate a Trace
+Run the built-in smoke suite with golden baseline diffing:
 
 ```bash
-huap eval trace examples/traces/golden_hello.jsonl
+huap ci run suites/smoke/suite.yaml --html reports/smoke.html
 ```
 
-Output:
-```
-Evaluation: PASSED
-Cost Grade: A
-Quality Grade: B
-Overall Grade: B
-
-Cost Metrics:
-  Tokens: 43
-  USD: $0.0001
-  Latency: 440ms
-```
-
----
-
-## Step 8: CI Integration
-
-Add to `.github/workflows/ci.yml`:
+Or add to your GitHub Actions workflow:
 
 ```yaml
 - name: Install HUAP
   run: pip install -e packages/hu-core
 
-- name: Run smoke tests
+- name: Run CI suite
   run: |
     export HUAP_LLM_MODE=stub
-    huap trace run hello examples/graphs/hello.yaml --out /tmp/smoke.jsonl
-    huap trace replay /tmp/smoke.jsonl --mode exec --verify
-    huap eval trace /tmp/smoke.jsonl
+    huap ci run suites/smoke/suite.yaml --html reports/smoke.html
 ```
 
 ---
 
 ## Next Steps
 
+- Explore example pods in `examples/pods/`
+- Set up the model router: `huap models init && huap models list`
+- Try human gates: `huap inbox list`
 - Read [Conformance](CONFORMANCE.md) for interface & schema contracts
-- Explore examples in `examples/pods/`
-- Try the model router: `huap models init && huap models list`
-- Set up human gates: `huap inbox list`
+- See the full [CLI Reference](README.md#-cli-reference)
 
 ---
 
