@@ -5,11 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hu-plugins-hindsight"
 version = "0.1.0"
-description = "HUAP plugin: Hindsight memory backend (retain/recall/reflect)"
+description = "HUAP plugin: Hindsight memory backend (SQLite provider + REST port)"
 requires-python = ">=3.10"
 dependencies = [
     "huap-core>=0.1.0b1",
 ]
 
 [project.optional-dependencies]
-hindsight = ["hindsight-client"]
+rest = ["hindsight-client"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hu_plugins_hindsight*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

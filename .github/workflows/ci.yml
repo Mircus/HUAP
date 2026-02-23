@@ -58,7 +58,7 @@ jobs:
       - name: Flagship suite (CI gate)
         run: |
           export HUAP_LLM_MODE=stub
-          huap ci run suites/flagship/suite.yaml --html reports/flagship.html || true
+          huap ci run suites/flagship/suite.yaml --html reports/flagship.html
 
       - name: Upload artifacts
         if: always()

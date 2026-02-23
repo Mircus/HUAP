@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import urllib.request
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from uuid import uuid4
 
 from hu_core.ports.memory import MemoryPort, MemoryItem

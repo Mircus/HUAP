@@ -37,6 +37,9 @@ Repository = "https://github.com/Mircus/HUAP"
 huap = "hu_core.cli.main:main"
 
 [project.optional-dependencies]
+default = [
+    "hu-plugins-hindsight>=0.1.0",
+]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
