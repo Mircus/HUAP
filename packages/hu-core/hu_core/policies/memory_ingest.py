@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Set
 
@@ -32,6 +33,26 @@ _SKIP_PATTERNS = [
     "full conversation",
     "[system]",
 ]
+
+# Regex patterns for secrets that must be redacted before storage
+_SECRET_PATTERNS = [
+    (re.compile(r"sk-[A-Za-z0-9]{20,}"), "[REDACTED_API_KEY]"),          # OpenAI keys
+    (re.compile(r"sk-ant-[A-Za-z0-9\-]{20,}"), "[REDACTED_API_KEY]"),    # Anthropic keys
+    (re.compile(r"ghp_[A-Za-z0-9]{36,}"), "[REDACTED_TOKEN]"),           # GitHub PAT
+    (re.compile(r"gho_[A-Za-z0-9]{36,}"), "[REDACTED_TOKEN]"),           # GitHub OAuth
+    (re.compile(r"glpat-[A-Za-z0-9\-]{20,}"), "[REDACTED_TOKEN]"),       # GitLab PAT
+    (re.compile(r"Bearer\s+[A-Za-z0-9\._\-]{20,}"), "Bearer [REDACTED]"),  # Bearer tokens
+    (re.compile(r"token[\"']?\s*[:=]\s*[\"'][A-Za-z0-9\._\-]{20,}[\"']"), "token: '[REDACTED]'"),
+    (re.compile(r"password[\"']?\s*[:=]\s*[\"'][^\"']{8,}[\"']"), "password: '[REDACTED]'"),
+    (re.compile(r"AKIA[A-Z0-9]{16}"), "[REDACTED_AWS_KEY]"),             # AWS access key
+]
+
+
+def redact_secrets(text: str) -> str:
+    """Scrub obvious secrets/tokens/keys from text before memory storage."""
+    for pattern, replacement in _SECRET_PATTERNS:
+        text = pattern.sub(replacement, text)
+    return text
 
 
 @dataclass
@@ -98,3 +119,7 @@ class MemoryIngestPolicy:
             self._seen_hashes.add(h)
 
         return IngestDecision(True, "OK")
+
+    def sanitize(self, content: str) -> str:
+        """Redact secrets from content before storage. Always call before retain."""
+        return redact_secrets(content)

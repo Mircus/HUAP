@@ -2,7 +2,7 @@
 HUAP Memory System
 
 This package provides a unified memory interface with multiple providers:
-- HindsightProvider: Stub for Hindsight API integration
+- HindsightProvider: SQLite-backed persistent memory (cross-session)
 - FileKVStore: File-based key-value storage (from persistence module)
 
 And a ContextBuilder that reconstructs context from trace events for

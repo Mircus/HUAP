@@ -1,0 +1,8 @@
+name: flagship
+scenarios:
+  - name: flagship_demo
+    pod: flagship
+    graph: examples/flagship/graph.yaml
+    golden: suites/flagship/baseline.jsonl
+    env:
+      HUAP_LLM_MODE: stub

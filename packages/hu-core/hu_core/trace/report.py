@@ -38,6 +38,7 @@ def _extract_summary(events: List[Dict[str, Any]]) -> Dict[str, Any]:
         "llm_calls": [],
         "router_decisions": [],
         "errors": [],
+        "memory_ops": [],
         "cost": {"tokens": 0, "usd_est": 0.0, "latency_ms": 0.0},
     }
 
@@ -61,12 +62,23 @@ def _extract_summary(events: List[Dict[str, Any]]) -> Dict[str, Any]:
         elif name == "node_enter":
             summary["nodes"].append(data.get("node", "?"))
         elif name in ("tool_call", "tool_result"):
-            summary["tools"].append({
-                "tool": data.get("tool", "?"),
+            tool_name = data.get("tool", "?")
+            entry = {
+                "tool": tool_name,
                 "event": name,
                 "status": data.get("status"),
                 "duration_ms": data.get("duration_ms"),
-            })
+            }
+            summary["tools"].append(entry)
+            # Track memory operations separately for the Memory section
+            if tool_name.startswith("memory."):
+                op = tool_name.split(".", 1)[1]  # retain, recall, reflect
+                mem_entry = {"op": op, "event": name, "data": data}
+                if name == "tool_call":
+                    mem_entry["input"] = data.get("input", {})
+                elif name == "tool_result":
+                    mem_entry["result"] = data.get("result", {})
+                summary["memory_ops"].append(mem_entry)
         elif name in ("llm_request", "llm_response"):
             summary["llm_calls"].append({
                 "model": data.get("model", "?"),
@@ -153,6 +165,44 @@ def _render_html(
             router_html += f"<li><b>{rd['decision']}</b> &mdash; {rd['reason']}</li>"
         router_html += "</ul>"
 
+    # Memory section
+    memory_html = ""
+    if summary["memory_ops"]:
+        retained = [m for m in summary["memory_ops"] if m["op"] == "retain" and m["event"] == "tool_call"]
+        recalled = [m for m in summary["memory_ops"] if m["op"] == "recall" and m["event"] == "tool_result"]
+        reflected = [m for m in summary["memory_ops"] if m["op"] == "reflect" and m["event"] == "tool_result"]
+
+        memory_html = "<h2>Memory Operations</h2>"
+        memory_html += f"<p>Retained: {len(retained)} | Recalled: {len(recalled)} | Reflected: {len(reflected)}</p>"
+
+        if retained:
+            memory_html += "<h3>Retained</h3><ul>"
+            for m in retained:
+                inp = m.get("input", {})
+                bank = inp.get("bank_id", "?")
+                content = inp.get("content", "")
+                if len(content) > 100:
+                    content = content[:100] + "..."
+                memory_html += f"<li><b>{bank}</b>: {content}</li>"
+            memory_html += "</ul>"
+
+        if recalled:
+            memory_html += "<h3>Recalled</h3><ul>"
+            for m in recalled:
+                res = m.get("result", {})
+                count = res.get("count", 0)
+                query = res.get("query", "")
+                memory_html += f"<li>Query: <i>{query}</i> → {count} result(s)</li>"
+            memory_html += "</ul>"
+
+        if reflected:
+            memory_html += "<h3>Reflected</h3><ul>"
+            for m in reflected:
+                res = m.get("result", {})
+                count = res.get("count", 0)
+                memory_html += f"<li>{count} insight(s)</li>"
+            memory_html += "</ul>"
+
     # Errors section
     errors_html = ""
     if summary["errors"]:
@@ -235,6 +285,7 @@ def _render_html(
 {timeline_rows}
 </table>
 
+{memory_html}
 {errors_html}
 {diff_html}
 

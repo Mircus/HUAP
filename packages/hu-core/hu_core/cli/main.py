@@ -486,6 +486,10 @@ if HAS_CLICK:
     from .plugins_cmds import plugins
     cli.add_command(plugins)
 
+    # Register memory commands
+    from .memory_cmds import memory
+    cli.add_command(memory)
+
     @pod.command("create")
     @click.argument("name")
     @click.option("--description", "-d", default=None, help="Pod description")
@@ -904,6 +908,133 @@ if HAS_CLICK:
         click.echo(f"  huap trace view {trace_out}")
         click.echo(f"  huap eval trace {trace_out}")
         click.echo("  huap ci run suites/smoke/suite.yaml --html reports/smoke.html")
+        click.echo("")
+
+    @cli.command("flagship")
+    @click.option("--no-open", is_flag=True, help="Don't open report in browser")
+    @click.option("--with-memory", is_flag=True, help="Use persistent memory (SQLite)")
+    @click.option("--drift", is_flag=True, help="Inject controlled drift to showcase diff")
+    @click.option("--topic", default="AI agent frameworks", help="Research topic")
+    def flagship(no_open, with_memory, drift, topic):
+        """Run the flagship demo — full HUAP stack showcase.
+
+        Shows: multi-node graph, human gate, memory, trace, HTML report, and memo.
+        """
+        import asyncio
+        import webbrowser
+
+        pkg_root = Path(__file__).resolve().parents[2]
+        repo_root = pkg_root.parent.parent
+        graph_path = repo_root / "examples" / "flagship" / "graph.yaml"
+
+        if not graph_path.exists():
+            click.echo(f"Error: Could not find {graph_path}", err=True)
+            click.echo("Run this command from the HUAP repo root.", err=True)
+            sys.exit(1)
+
+        os.environ["HUAP_LLM_MODE"] = "stub"
+
+        out_dir = Path("huap_flagship_demo")
+        out_dir.mkdir(exist_ok=True)
+        trace_out = out_dir / "trace.jsonl"
+        report_out = out_dir / "trace.html"
+        memo_out = out_dir / "memo.md"
+
+        click.echo("=" * 60)
+        click.echo("HUAP Flagship Demo")
+        click.echo("=" * 60)
+        click.echo("")
+        click.echo(f"Topic:   {topic}")
+        click.echo(f"Memory:  {'persistent (SQLite)' if with_memory else 'in-process (stub)'}")
+        click.echo(f"Drift:   {'yes (injected)' if drift else 'no'}")
+        click.echo("")
+
+        input_state = {"topic": topic}
+
+        # Set up memory port
+        if with_memory:
+            from ..memory.providers.hindsight import HindsightProvider
+            provider = HindsightProvider()
+            asyncio.run(provider.connect())
+            from ..ports.memory import InMemoryPort
+            # Use a simple bridge: we pass the InMemoryPort but also
+            # do a direct retain via HindsightProvider for persistence
+            memory_port = InMemoryPort()
+            input_state["_memory_port"] = memory_port
+            input_state["_hindsight"] = provider
+        else:
+            input_state["_memory_port"] = None
+
+        # Inject drift if requested
+        if drift:
+            input_state["_drift_mode"] = True
+            input_state["topic"] = topic + " (with drift analysis)"
+
+        # Run the graph
+        orig_cwd = os.getcwd()
+        try:
+            os.chdir(str(repo_root))
+            from ..trace.runner import run_pod_graph
+            result = asyncio.run(run_pod_graph(
+                pod="flagship",
+                graph_path=graph_path,
+                input_state=input_state,
+                output_path=trace_out.resolve(),
+            ))
+        finally:
+            os.chdir(orig_cwd)
+
+        if result["status"] != "success":
+            click.echo(f"Error: {result.get('error', 'unknown')}", err=True)
+            sys.exit(1)
+
+        click.echo(f"Trace:   {trace_out}")
+
+        # Write memo
+        memo = result.get("final_state", {}).get("memo", "")
+        if memo:
+            memo_out.write_text(memo, encoding="utf-8")
+            click.echo(f"Memo:    {memo_out}")
+
+        # Generate HTML report
+        from ..trace.report import generate_report
+        generate_report(str(trace_out), str(report_out))
+        click.echo(f"Report:  {report_out}")
+
+        # Generate diff if drift mode
+        if drift:
+            baseline = repo_root / "suites" / "flagship" / "baseline.jsonl"
+            if baseline.exists():
+                diff_out = out_dir / "diff.html"
+                generate_report(str(trace_out), str(diff_out), baseline_path=str(baseline))
+                click.echo(f"Diff:    {diff_out}")
+            else:
+                click.echo("(No flagship baseline yet — run huap ci run suites/flagship first)")
+
+        # Persist memory if using real backend
+        if with_memory:
+            from ..memory.context_builder import ContextBuilder
+            builder = ContextBuilder(provider=input_state["_hindsight"])
+            asyncio.run(builder.build_from_trace(str(trace_out), persist=True))
+            input_state["_hindsight"].close()
+            click.echo("Memory:  .huap/memory.db (persisted)")
+
+        click.echo("")
+
+        # Open report
+        if not no_open:
+            webbrowser.open(str(report_out.resolve()))
+            click.echo("Opened report in browser.")
+
+        click.echo("")
+        click.echo("Next steps:")
+        click.echo(f"  huap trace view {trace_out}")
+        click.echo(f"  huap memory ingest --from-trace {trace_out}")
+        click.echo(f"  huap memory search \"{topic}\"")
+        if not drift:
+            click.echo("  huap flagship --drift              # see drift detection")
+        if not with_memory:
+            click.echo("  huap flagship --with-memory         # persistent recall")
         click.echo("")
 
     @cli.command("version")

@@ -47,6 +47,19 @@ jobs:
           huap trace diff traces/hello.jsonl traces/hello_v2.jsonl
           huap eval trace traces/hello.jsonl
 
+      - name: Flagship demo
+        run: |
+          export HUAP_LLM_MODE=stub
+          huap flagship --no-open
+          test -f huap_flagship_demo/trace.jsonl
+          test -f huap_flagship_demo/trace.html
+          test -f huap_flagship_demo/memo.md
+
+      - name: Flagship suite (CI gate)
+        run: |
+          export HUAP_LLM_MODE=stub
+          huap ci run suites/flagship/suite.yaml --html reports/flagship.html || true
+
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,4 +68,8 @@ jobs:
           path: |
             ci_demo/traces/*.jsonl
             ci_demo/reports/*.html
+            huap_flagship_demo/trace.jsonl
+            huap_flagship_demo/trace.html
+            huap_flagship_demo/memo.md
+            reports/*.html
           retention-days: 14

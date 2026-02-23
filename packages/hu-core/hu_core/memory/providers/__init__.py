@@ -2,7 +2,7 @@
 Memory Providers Package
 
 Provides different backends for the HUAP memory system:
-- HindsightProvider: Hindsight API integration (stub)
+- HindsightProvider: SQLite-backed persistent memory
 - FileKVStore: File-based storage (from persistence module)
 """
 

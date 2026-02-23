@@ -1,0 +1,35 @@
+# Flagship Demo Graph — Full HUAP stack showcase
+# Pipeline: research → analyze → gate → synthesize → memorize
+
+nodes:
+  - name: research
+    run: examples.flagship.nodes.research
+    description: "Gather data from safe sources"
+
+  - name: analyze
+    run: examples.flagship.nodes.analyze
+    description: "Extract insights from research"
+
+  - name: gate
+    run: examples.flagship.nodes.gate
+    description: "Human approval checkpoint"
+
+  - name: synthesize
+    run: examples.flagship.nodes.synthesize
+    description: "Produce shareable memo"
+
+  - name: memorize
+    run: examples.flagship.nodes.memorize
+    description: "Persist findings for cross-session recall"
+
+edges:
+  - from: research
+    to: analyze
+  - from: analyze
+    to: gate
+  - from: gate
+    to: synthesize
+  - from: synthesize
+    to: memorize
+  - from: memorize
+    to: null

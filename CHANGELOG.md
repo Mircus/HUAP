@@ -2,7 +2,7 @@
 
 All notable changes to HUAP Core are documented here.
 
-## [0.1.0b1] — 2026-02-21
+## [0.1.0b1] — 2026-02-23
 
 First public beta release.
 
@@ -41,6 +41,7 @@ First public beta release.
 ### Plugins & Memory
 - **Plugin SDK** — registry for memory backends, tool packs, providers
 - **MemoryPort** — retain/recall/reflect interface for cross-run knowledge
+- **HindsightProvider** — SQLite-backed persistent memory (cross-session knowledge retention)
 - **Memory tools** — node-level access to memory operations
 - **Ingest policy** — control what gets stored automatically
 
@@ -57,7 +58,7 @@ First public beta release.
 - `huap plugins init/list` — plugin management
 
 ### Developer Experience
-- **96 tests** passing across Python 3.10, 3.11, 3.12
+- **110 tests** passing across Python 3.10, 3.11, 3.12
 - **GitHub Actions CI** — lint (ruff), pytest, smoke test, golden path, artifact upload
 - **Makefile** — `make install test lint smoke demo ci`
 - **Smoke suite** — `suites/smoke/suite.yaml` with golden baseline

@@ -1,4 +1,4 @@
-"""Tests for P9 — Plugin SDK, MemoryPort, ingest policy, CMP toolpack."""
+"""Tests for P9 — Plugin SDK, MemoryPort, ingest policy, CMP toolpack, HindsightProvider."""
 import pytest
 from pathlib import Path
 
@@ -7,6 +7,8 @@ from hu_core.plugins.registry import PluginRegistry
 from hu_core.ports.memory import InMemoryPort, MemoryItem
 from hu_core.tools.memory_tools import memory_retain, memory_recall, memory_reflect
 from hu_core.policies.memory_ingest import MemoryIngestPolicy
+from hu_core.memory.providers.hindsight import HindsightProvider
+from hu_core.memory.providers.base import MemoryEntry, MemoryQuery, MemoryType, MemoryStatus
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -204,6 +206,183 @@ class TestMemoryIngestPolicy:
         policy = MemoryIngestPolicy(allowed_contexts={"preference"})
         dec = policy.should_retain("important thing", context="random")
         assert dec.allowed is False
+
+    def test_sanitize_redacts_openai_key(self):
+        policy = MemoryIngestPolicy()
+        text = "Using key sk-abc123def456ghi789jkl012mno345pqr678"
+        sanitized = policy.sanitize(text)
+        assert "sk-abc" not in sanitized
+        assert "[REDACTED_API_KEY]" in sanitized
+
+    def test_sanitize_redacts_github_pat(self):
+        policy = MemoryIngestPolicy()
+        text = "token: ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789AB"
+        sanitized = policy.sanitize(text)
+        assert "ghp_" not in sanitized
+        assert "[REDACTED_TOKEN]" in sanitized
+
+    def test_sanitize_redacts_aws_key(self):
+        policy = MemoryIngestPolicy()
+        text = "AWS access key: AKIAIOSFODNN7EXAMPLE"
+        sanitized = policy.sanitize(text)
+        assert "AKIA" not in sanitized
+        assert "[REDACTED_AWS_KEY]" in sanitized
+
+    def test_sanitize_preserves_normal_text(self):
+        policy = MemoryIngestPolicy()
+        text = "User prefers dark mode and uses Python 3.11"
+        assert policy.sanitize(text) == text
+
+    def test_sanitize_redacts_bearer_token(self):
+        policy = MemoryIngestPolicy()
+        text = "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.signature"
+        sanitized = policy.sanitize(text)
+        assert "eyJh" not in sanitized
+        assert "Bearer [REDACTED]" in sanitized
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HindsightProvider (SQLite backend)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestHindsightProvider:
+    @pytest.fixture
+    async def provider(self, tmp_path):
+        p = HindsightProvider(db_path=str(tmp_path / "test.db"))
+        assert await p.connect() is True
+        yield p
+        p.close()
+
+    def _make_entry(self, key="test_key", value="test_value", **kwargs):
+        defaults = {
+            "key": key,
+            "value": value,
+            "memory_type": MemoryType.FACT,
+            "namespace": "default",
+        }
+        defaults.update(kwargs)
+        return MemoryEntry(**defaults)
+
+    @pytest.mark.asyncio
+    async def test_connect_creates_db(self, tmp_path):
+        db = tmp_path / "sub" / "test.db"
+        p = HindsightProvider(db_path=str(db))
+        result = await p.connect()
+        assert result is True
+        assert db.exists()
+        p.close()
+
+    @pytest.mark.asyncio
+    async def test_set_and_get_roundtrip(self, provider):
+        entry = self._make_entry(key="k1", value={"msg": "hello"})
+        await provider.set(entry)
+        got = await provider.get("k1")
+        assert got is not None
+        assert got.key == "k1"
+        assert got.value == {"msg": "hello"}
+        assert got.memory_type == MemoryType.FACT
+
+    @pytest.mark.asyncio
+    async def test_get_missing_returns_none(self, provider):
+        got = await provider.get("nonexistent")
+        assert got is None
+
+    @pytest.mark.asyncio
+    async def test_set_overwrites(self, provider):
+        await provider.set(self._make_entry(key="k1", value="first"))
+        await provider.set(self._make_entry(key="k1", value="second"))
+        got = await provider.get("k1")
+        assert got.value == "second"
+
+    @pytest.mark.asyncio
+    async def test_delete(self, provider):
+        await provider.set(self._make_entry(key="del_me"))
+        assert await provider.delete("del_me") is True
+        assert await provider.get("del_me") is None
+
+    @pytest.mark.asyncio
+    async def test_delete_missing(self, provider):
+        assert await provider.delete("nope") is False
+
+    @pytest.mark.asyncio
+    async def test_query_by_type(self, provider):
+        await provider.set(self._make_entry(key="f1", memory_type=MemoryType.FACT, namespace="ns"))
+        await provider.set(self._make_entry(key="d1", memory_type=MemoryType.DECISION, namespace="ns"))
+        results = await provider.query(MemoryQuery(namespace="ns", memory_type=MemoryType.FACT))
+        assert len(results) == 1
+        assert results[0].key == "f1"
+
+    @pytest.mark.asyncio
+    async def test_query_by_run_id(self, provider):
+        await provider.set(self._make_entry(key="r1", run_id="run_abc"))
+        await provider.set(self._make_entry(key="r2", run_id="run_xyz"))
+        results = await provider.query(MemoryQuery(run_id="run_abc"))
+        assert len(results) == 1
+        assert results[0].key == "r1"
+
+    @pytest.mark.asyncio
+    async def test_query_pagination(self, provider):
+        for i in range(5):
+            await provider.set(self._make_entry(key=f"p{i}", namespace="page"))
+        results = await provider.query(MemoryQuery(namespace="page", limit=2, offset=0))
+        assert len(results) == 2
+        results2 = await provider.query(MemoryQuery(namespace="page", limit=2, offset=2))
+        assert len(results2) == 2
+        results3 = await provider.query(MemoryQuery(namespace="page", limit=2, offset=4))
+        assert len(results3) == 1
+
+    @pytest.mark.asyncio
+    async def test_list_keys(self, provider):
+        await provider.set(self._make_entry(key="a", namespace="ns"))
+        await provider.set(self._make_entry(key="b", namespace="ns"))
+        await provider.set(self._make_entry(key="c", namespace="other"))
+        keys = await provider.list_keys(namespace="ns")
+        assert sorted(keys) == ["a", "b"]
+
+    @pytest.mark.asyncio
+    async def test_persistence_across_sessions(self, tmp_path):
+        db = str(tmp_path / "persist.db")
+        # Session 1: write
+        p1 = HindsightProvider(db_path=db)
+        await p1.connect()
+        await p1.set(self._make_entry(key="persist_key", value="survives"))
+        p1.close()
+        # Session 2: read
+        p2 = HindsightProvider(db_path=db)
+        await p2.connect()
+        got = await p2.get("persist_key")
+        assert got is not None
+        assert got.value == "survives"
+        p2.close()
+
+    @pytest.mark.asyncio
+    async def test_search_semantic_keyword(self, provider):
+        await provider.set(self._make_entry(key="agent_pref", value="User prefers dark mode"))
+        await provider.set(self._make_entry(key="weather", value="Today is sunny"))
+        results = await provider.search_semantic("dark mode")
+        assert len(results) == 1
+        assert results[0].key == "agent_pref"
+
+    @pytest.mark.asyncio
+    async def test_get_episode(self, provider):
+        await provider.set(self._make_entry(key="e1", run_id="ep1", user_id="u1"))
+        await provider.set(self._make_entry(key="e2", run_id="ep1", user_id="u1"))
+        await provider.set(self._make_entry(key="e3", run_id="ep2", user_id="u1"))
+        episode = await provider.get_episode("ep1", user_id="u1")
+        assert episode is not None
+        assert episode["entry_count"] == 2
+        assert episode["episode_id"] == "ep1"
+
+    @pytest.mark.asyncio
+    async def test_reflect_returns_summary(self, provider):
+        await provider.set(self._make_entry(key="f1", memory_type=MemoryType.FACT, user_id="u1"))
+        await provider.set(self._make_entry(key="f2", memory_type=MemoryType.FACT, user_id="u1"))
+        await provider.set(self._make_entry(key="d1", memory_type=MemoryType.DECISION, user_id="u1"))
+        result = await provider.reflect(user_id="u1")
+        assert result["status"] == "ok"
+        assert result["total_entries"] == 3
+        assert result["by_type"]["fact"] == 2
+        assert result["by_type"]["decision"] == 1
 
 
 # ═══════════════════════════════════════════════════════════════════════════
