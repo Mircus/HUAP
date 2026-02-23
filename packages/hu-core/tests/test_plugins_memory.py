@@ -8,7 +8,7 @@ from hu_core.ports.memory import InMemoryPort, MemoryItem
 from hu_core.tools.memory_tools import memory_retain, memory_recall, memory_reflect
 from hu_core.policies.memory_ingest import MemoryIngestPolicy
 from hu_core.memory.providers.hindsight import HindsightProvider
-from hu_core.memory.providers.base import MemoryEntry, MemoryQuery, MemoryType, MemoryStatus
+from hu_core.memory.providers.base import MemoryEntry, MemoryQuery, MemoryType
 
 
 # ═══════════════════════════════════════════════════════════════════════════

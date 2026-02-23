@@ -27,30 +27,35 @@ HUAP Core provides the foundational toolkit for building AI agent systems that a
 
 ## 🚀 3-Minute Wow Path
 
-Five commands, copy-paste from repo root. No API keys needed.
+Six commands, copy-paste from repo root. No API keys needed.
 
 ```bash
 # 1. Install (PyPI or from source)
 pip install huap-core              # PyPI
 # pip install -e packages/hu-core  # or from source
 
-# 2. One-liner demo — runs a graph, generates an HTML report, opens it in your browser
+# 2. Flagship demo — research → analyze → human gate → synthesize → memorize
+huap flagship --no-open
+# outputs: huap_flagship_demo/trace.jsonl, trace.html, memo.md
+
+# 3. One-liner demo — runs a graph, generates an HTML report, opens it in your browser
 huap demo
 
-# 3. Diff two stub runs — proves deterministic replay catches drift
+# 4. Diff two stub runs — proves deterministic replay catches drift
 HUAP_LLM_MODE=stub huap trace run hello examples/graphs/hello.yaml --out /tmp/a.jsonl
 HUAP_LLM_MODE=stub huap trace run hello examples/graphs/hello.yaml --out /tmp/b.jsonl
 huap trace diff /tmp/a.jsonl /tmp/b.jsonl
 
-# 4. CI gate with baseline — runs suite, diffs vs golden, produces HTML report
+# 5. CI gate with baseline — runs suite, diffs vs golden, produces HTML report
 huap ci run suites/smoke/suite.yaml --html reports/smoke.html
 
-# 5. Shareable HTML artifact — standalone report you can send to anyone
+# 6. Shareable HTML artifact — standalone report you can send to anyone
 huap trace report /tmp/a.jsonl --out reports/trace.html
 ```
 
 | Command | What it proves |
 |---|---|
+| `huap flagship` | Full 5-node pipeline: research, analysis, human gate, synthesis, memory |
 | `huap demo` | Full graph → trace → HTML report pipeline works out of the box |
 | `huap trace diff` | Two identical stub runs produce zero drift |
 | `huap ci run` | Suite runner diffs against golden baselines and gates CI |
@@ -180,6 +185,17 @@ huap inbox edit    <gate_id>     # Edit params via JSON patch and approve
 # Watch (live tail)
 huap watch <trace>               # Live-tail a trace file (issues, gates, budget)
 
+# Memory
+huap memory search <query>       # Keyword search across stored memories
+huap memory ingest --from-trace <file>  # Ingest trace events into memory
+huap memory stats                # Show memory database statistics
+
+# Flagship demo
+huap flagship                    # Full pipeline: research → gate → memo (opens browser)
+huap flagship --no-open          # Same, skip browser
+huap flagship --with-memory      # Persist findings to SQLite memory
+huap flagship --drift            # Inject drift to show diff detection
+
 # Plugins
 huap plugins init                # Create starter plugins.yaml
 huap plugins list                # List registered plugins
@@ -287,24 +303,39 @@ huap plugins init           # Create config/plugins.yaml
 huap plugins list           # Show registered plugins + status
 ```
 
+### HindsightProvider (SQLite memory backend)
+
+The built-in `HindsightProvider` gives agents persistent memory via SQLite — zero extra dependencies:
+
+```bash
+# Store findings during a flagship run
+huap flagship --with-memory --no-open
+
+# Search persisted memories
+huap memory search "AI agent"
+
+# View database statistics
+huap memory stats
+
+# Ingest any trace into memory
+huap memory ingest --from-trace traces/hello.jsonl
+```
+
+Memory operations emit trace events, so they appear in HTML reports and can be diffed in CI.
+
 ### MemoryPort (retain / recall / reflect)
 
-The `MemoryPort` interface lets agents persist and retrieve knowledge across runs. Implementations are loaded as plugins.
+The `MemoryPort` interface lets agents persist and retrieve knowledge across runs:
 
-| Plugin | Package | Description |
-|---|---|---|
-| `memory_hindsight` | `hu-plugins-hindsight` | Hindsight memory backend (retain/recall/reflect) |
-| `toolpack_cmp` | `hu-plugins-cmp` | Commonplace tool pack (capture/link/search notes) |
+| Method | Purpose |
+|---|---|
+| `retain(key, value)` | Store a finding for future sessions |
+| `recall(query, k)` | Retrieve relevant memories by keyword |
+| `reflect(user_id, pod)` | Summarize what the agent has learned |
 
 ### Memory Tools
 
-Built-in `memory_tools` (`hu_core.tools.memory_tools`) give nodes access to `retain`, `recall`, and `reflect` operations. An **ingest policy** (`hu_core.policies`) controls what gets stored automatically.
-
-Install optional packages (from source):
-```bash
-pip install -e packages/hu-plugins-hindsight   # Memory backend
-pip install -e packages/hu-plugins-cmp         # Commonplace tool pack
-```
+Built-in `memory_tools` (`hu_core.tools.memory_tools`) give nodes access to `retain`, `recall`, and `reflect` operations. An **ingest policy** (`hu_core.policies`) controls what gets stored — with automatic **secret redaction** (API keys, tokens, credentials are stripped before storage).
 
 ---
 
@@ -345,6 +376,7 @@ HUAP/
 │   ├── hu-plugins-hindsight/  # Hindsight memory backend (optional)
 │   └── hu-plugins-cmp/        # Commonplace tool pack (optional)
 ├── examples/
+│   ├── flagship/              # Full-stack demo (research → gate → memo → memory)
 │   ├── pods/                  # Reference pod implementations
 │   │   ├── hello-pod/         # Minimal deterministic example
 │   │   ├── llm-pod/           # LLM integration example
@@ -352,12 +384,14 @@ HUAP/
 │   │   ├── squad_ecom/        # Specialist squad demo (6 nodes)
 │   │   ├── human_gate_demo/   # Human gate + inbox workflow
 │   │   └── tool_learning/     # Tool learning with memory
+│   ├── wrappers/              # Drop-in wrapper examples (LangChain, CrewAI)
 │   ├── graphs/                # Runnable workflow definitions (nodes[] + edges[])
 │   │   └── incubator/         # Experimental DSL (not executed)
 │   ├── adapters/              # CrewAI + LangChain demo scripts
 │   └── memory/                # Memory / Hindsight demo scripts
 └── suites/
-    └── smoke/                 # CI baseline traces
+    ├── smoke/                 # Smoke test baseline traces
+    └── flagship/              # Flagship demo baseline + suite
 ```
 
 ---
@@ -401,7 +435,7 @@ Areas for future work:
 - **More adapters** — LlamaIndex, AutoGen, Semantic Kernel
 - **Plugin ecosystem** — community memory backends, tool packs, providers
 - **Web UI for inbox** — browser-based gate review and approval
-- **More memory backends** — vector stores, SQLite, cloud-hosted
+- **Vector memory backends** — embedding-based semantic search (current: keyword/SQLite)
 - **Trace schema formalization** — JSONSchema for events, versioned backwards compatibility
 
 If you want to work on one of these, open an issue with the prefix **[RFC]**, **[Adapter]**, **[Plugin]**, or **[Memory]**.
