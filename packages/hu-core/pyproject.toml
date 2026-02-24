@@ -53,6 +53,9 @@ encryption = [
 where = ["."]
 include = ["hu_core*"]
 
+[tool.setuptools.package-data]
+"hu_core.examples.flagship" = ["*.yaml"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

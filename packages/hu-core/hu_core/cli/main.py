@@ -923,13 +923,28 @@ if HAS_CLICK:
         import asyncio
         import webbrowser
 
-        pkg_root = Path(__file__).resolve().parents[2]
-        repo_root = pkg_root.parent.parent
-        graph_path = repo_root / "examples" / "flagship" / "graph.yaml"
+        # Look for bundled graph first (pip install), then repo root (dev install)
+        pkg_dir = Path(__file__).resolve().parent.parent
+        bundled = pkg_dir / "examples" / "flagship" / "graph.yaml"
+        repo_root_dir = pkg_dir.parent.parent
+        repo_graph = repo_root_dir / "examples" / "flagship" / "graph.yaml"
+        cwd_path = Path.cwd() / "examples" / "flagship" / "graph.yaml"
 
-        if not graph_path.exists():
-            click.echo(f"Error: Could not find {graph_path}", err=True)
-            click.echo("Run this command from the HUAP repo root.", err=True)
+        graph_path = None
+        need_chdir = None  # directory to chdir into for imports
+        if bundled.exists():
+            graph_path = bundled
+            # bundled graph uses hu_core.examples.flagship.nodes — no chdir needed
+        elif repo_graph.exists():
+            graph_path = repo_graph
+            need_chdir = str(repo_root_dir)
+        elif cwd_path.exists():
+            graph_path = cwd_path
+            need_chdir = str(Path.cwd())
+
+        if graph_path is None:
+            click.echo("Error: Could not find flagship graph.yaml", err=True)
+            click.echo("Expected at: hu_core/examples/flagship/graph.yaml", err=True)
             sys.exit(1)
 
         os.environ["HUAP_LLM_MODE"] = "stub"
@@ -973,7 +988,8 @@ if HAS_CLICK:
         # Run the graph
         orig_cwd = os.getcwd()
         try:
-            os.chdir(str(repo_root))
+            if need_chdir:
+                os.chdir(need_chdir)
             from ..trace.runner import run_pod_graph
             result = asyncio.run(run_pod_graph(
                 pod="flagship",
