@@ -22,10 +22,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pip install -e packages/hu-core[dev]
+        run: |
+          pip install -e packages/hu-plugins-hindsight
+          pip install -e packages/hu-core[dev]
 
       - name: Lint with ruff
-        run: ruff check packages/hu-core/
+        run: ruff check packages/hu-core/ packages/hu-plugins-hindsight/
 
       - name: Run tests
         run: pytest packages/hu-core/tests/ -q
