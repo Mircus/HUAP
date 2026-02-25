@@ -1,10 +1,10 @@
 # HUAP — Action List (Feb 2026)
 
-Current state: **110 tests passing**, CI green (3.10-3.12), safe condition evaluator, `huap demo`, suite runner with HTML reports, README wow path, real SQLite memory backend.
+Current state: **115 tests passing**, CI green (3.10-3.12), PyPI published (`pip install huap-core`), flagship demo, real SQLite memory, secret redaction, plugin boundary clean.
 
 ---
 
-## COMPLETED SPRINTS (collapsed)
+## COMPLETED SPRINTS
 
 <details>
 <summary>P0 — Core hygiene ✅</summary>
@@ -45,134 +45,41 @@ Current state: **110 tests passing**, CI green (3.10-3.12), safe condition evalu
 - 14 new tests (persistence across sessions verified)
 </details>
 
----
+<details>
+<summary>Final WOW Sprint ✅</summary>
 
-## FINAL WOW SPRINT — Public Beta Release
+- F1: Flagship demo (`huap flagship`) — 5-node pipeline with human gate + memory
+- F2: Flagship suite + baseline — CI-gated regression detection
+- F3: Memory CLI commands — `huap memory search/ingest/stats`
+- F4: Memory events in trace + HTML report
+- F5: Wrapper examples (LangChain + CrewAI)
+- F6: Video script + assets
+- F7: Adopter guide
+- F8: README hero section with bold badges + PyPI link
+- F9: PyPI publish + tag `v0.1.0b1`
+</details>
 
-### Goal
-Ship HUAP Public Beta that showcases:
-**Agent CI + Flight Recorder + Human Gates + Real Local Memory**
+<details>
+<summary>Pre-PyPI Blockers ✅</summary>
 
-### F1. Flagship demo (`huap demo flagship`)
-**Why:** The existing `huap demo` runs hello (trivial). A flagship demo shows the FULL stack: multi-node graph, human gate, memory, drift detection.
-
-- [ ] Create `examples/flagship/` with:
-  - Multi-node graph (research → analyze → gate → synthesize → memorize)
-  - Node functions using safe tools, human gate, memory retain/recall
-- [ ] Add `huap demo flagship` CLI command with flags:
-  - `--drift` — inject controlled drift to showcase diff
-  - `--with-memory` — use HindsightProvider for persist/retrieve
-  - Default: stub mode, no keys needed
-- [ ] Artifacts written to `huap_flagship_demo/` in cwd:
-  - `trace.jsonl`, `trace.html`
-- [ ] `examples/flagship/README.md` with 3 commands + expected output
-
-### F2. Flagship suite + baseline
-**Why:** Proves CI catches regressions on a real workflow.
-
-- [ ] Create `suites/flagship/suite.yaml` pointing to flagship graph
-- [ ] Generate + commit `suites/flagship/baseline.jsonl` in stub mode
-- [ ] Verify `huap ci run suites/flagship --html reports/flagship.html` passes
-
-### F3. Memory CLI commands
-**Why:** Makes memory discoverable without writing code.
-
-- [ ] `huap memory search <query>` — keyword search across stored memories
-- [ ] `huap memory ingest --from-trace <file>` — ingest trace into memory via ContextBuilder
-- [ ] `huap memory stats` — show db path, entry count, types breakdown
-- [ ] Wire into main CLI group
-
-### F4. Memory events in trace + HTML report
-**Why:** Memory operations must be visible in the flight recorder.
-
-- [ ] Emit `memory_retain` and `memory_recall` trace events from memory_tools
-- [ ] Add "Memory" section to HTML report (`trace/report.py`):
-  - List of retained items
-  - List of recalled items with scores
-- [ ] Works in both stub and real mode
-
-### F5. Wrapper examples (adoption paths)
-**Why:** "Keep your framework, HUAP makes it traceable" needs proof.
-
-- [ ] `examples/wrappers/langchain/` — before/after showing HuapCallbackHandler
-  - `run.py` that runs in stub mode, produces trace + report
-  - `README.md` with commands
-- [ ] `examples/wrappers/crewai/` — before/after showing manual instrumentation
-  - `run.py` stub mode, produces trace + report
-  - `README.md` with commands
-
-### F6. Video script + assets
-**Why:** Mirco needs to record the demo video.
-
-- [ ] `docs/media/video_script.md` with:
-  - Timestamps, exact terminal commands, on-screen captions
-  - Must-show: flagship demo, HTML report, CI pass, drift detection, human gate, memory
-- [ ] Clean screenshot of HTML report for thumbnail
-
-### F7. Adopter guide (markdown)
-**Why:** Non-technical stakeholders need to understand value without reading code.
-
-- [ ] `docs/HUAP_Adopter_Guide.md` covering:
-  - What HUAP is (1 page)
-  - 3 problems it solves (reproducibility, drift detection, governance)
-  - Adoption paths (wrap existing / build new / mixed)
-  - Operating model (who owns baselines, who approves gates)
-  - CI cookbook (when to refresh baselines, drift triage)
-  - FAQ
-
-### F8. README hero section update
-**Why:** First impression for GitHub visitors.
-
-- [ ] Top of README: video placeholder + flagship command + value bullets
-- [ ] Add Memory section with 2 commands
-- [ ] Links to: adopter guide, wrapper examples, suites
-- [ ] Keep existing sections intact
-
-### F9. PyPI publish + tag
-**Why:** `pip install huap-core` is the adoption bar.
-
-- [ ] Mirco provides PyPI credentials
-- [ ] `twine upload dist/*`
-- [ ] Verify `pip install huap-core && huap demo` from clean venv
-- [ ] Git tag `v0.1.0b1`
-- [ ] GitHub Release with release notes
+- Blocker A: Moved HindsightProvider to `hu-plugins-hindsight` (plugin boundary)
+- Blocker B: Wired `redact_secrets()` into persistence choke point
+- CI: Removed `|| true` from flagship suite gate
+- CI: Fixed cross-dependency install (core + plugin in single pip command)
+- Fixed ruff lint error (undefined `repo_root` after refactor)
+- Bundled flagship demo in wheel (`hu_core/examples/flagship/`)
+- Switched badge to Shields.io (for-the-badge style)
+</details>
 
 ---
 
-## Final QA checklist (run before tagging)
+## ✅ Public Beta — SHIPPED
 
-- [ ] `pytest` all green (target: 120+ tests)
-- [ ] `huap demo` works
-- [ ] `huap demo flagship` works (stub mode, no keys)
-- [ ] `huap demo flagship --with-memory` persists + retrieves on 2nd run
-- [ ] `huap ci run suites/smoke` PASS
-- [ ] `huap ci run suites/flagship` PASS
-- [ ] `huap memory search` returns results
-- [ ] GH Actions workflow green on main
-- [ ] README links all valid
-- [ ] No `eval()` in core
-- [ ] No secrets in repo
-- [ ] ruff clean
-
----
-
-## Execution order
-
-**Phase A — Memory integration + flagship** (Claude)
-1. F3: Memory CLI commands
-2. F4: Memory in trace + report
-3. F1: Flagship demo
-4. F2: Flagship suite + baseline
-
-**Phase B — Distribution + adoption** (Claude)
-5. F5: Wrapper examples
-6. F8: README hero update
-7. F6: Video script
-8. F7: Adopter guide
-
-**Phase C — Release** (Mirco + Claude)
-9. F9: PyPI publish + tag
-10. Mirco: record + upload video, add YouTube link
+- **PyPI**: `pip install huap-core` — [pypi.org/project/huap-core](https://pypi.org/project/huap-core/)
+- **Git tag**: `v0.1.0b1`
+- **GitHub Release**: Pre-release with release notes
+- **CI**: Green on all Python versions (3.10, 3.11, 3.12)
+- **115 tests passing**, ruff clean
 
 ---
 
@@ -185,3 +92,6 @@ Ship HUAP Public Beta that showcases:
 - Web UI for inbox
 - FTS5 / vector search for memory
 - More memory backends (cloud-hosted)
+- Agent message events (`message` trace kind) — see AFTERBETA.md
+- Streaming token capture in LangChain adapter
+- Parent span tracking for parallel execution branches
