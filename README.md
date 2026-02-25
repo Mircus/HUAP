@@ -1,32 +1,58 @@
 
 <p align="center">
   <img src="HUAP-logo.png" alt="HUAP-Logo" width="700"/>
-  <br/><br/>
-  <a href="https://github.com/Mircus/HUAP/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Mircus/HUAP/ci.yml?branch=main&label=CI&style=for-the-badge" alt="CI"></a>
-  <a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/v/huap-core?style=for-the-badge&label=PyPI" alt="PyPI"></a>
-  <a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/pyversions/huap-core?style=for-the-badge&label=Python" alt="Python"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/Mircus/HUAP?style=for-the-badge" alt="License"></a>
-  <br/><br/>
-  <strong>Trace-first primitives for deterministic, testable agents</strong>
-  <br/>
-  <em>Keep your framework. HUAP makes it reproducible, diffable, and CI-gated.</em>
 </p>
 
+<div align="center">
+
+<a href="https://github.com/Mircus/HUAP/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Mircus/HUAP/ci.yml?branch=main&label=CI&style=for-the-badge" alt="CI"></a>
+<a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/v/huap-core?style=for-the-badge&label=PyPI&color=blue" alt="PyPI"></a>
+<a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/pyversions/huap-core?style=for-the-badge&label=Python" alt="Python"></a>
+<a href="LICENSE"><img src="https://img.shields.io/github/license/Mircus/HUAP?style=for-the-badge&color=purple" alt="License"></a>
+
+<br/>
+
+**HUman Agentic Platform**
+<br/>
+*Trace-first primitives for deterministic, testable agents*
+
+</div>
+
+<br/>
+
+<div align="center">
+<table>
+<tr>
+<td align="center">
+
+```
+pip install huap-core
+```
+
+</td>
+</tr>
+</table>
+</div>
+
 ---
+
+**Trace-first Agent CI + Specialist Squad Orchestrator.**
+
+> "Keep your framework. HUAP makes it reproducible, diffable, and CI-gated."
 
 HUAP Core provides the foundational toolkit for building AI agent systems that are:
 
-- **Traceable** — every action recorded as replayable JSONL events
-- **Deterministic** — stub mode + replay verification for reproducible testing
-- **Evaluatable** — cost/quality grading to gate regressions in CI
-- **Squad-ready** — specialist model router picks the right model for each task
-- **Framework-agnostic** — adapters for CrewAI, LangChain, or wrap any script
-- **Human-gated** — pause, review, and approve agent actions via an inbox
-- **Pluggable** — plugin SDK for memory backends, tool packs, and providers
+- 🧾 **Traceable** — every action recorded as replayable JSONL events
+- 🔁 **Deterministic** — stub mode + replay verification for reproducible testing
+- 🧪 **Evaluatable** — cost/quality grading to gate regressions in CI
+- 🤖 **Squad-ready** — specialist model router picks the right model for each task
+- 🔌 **Framework-agnostic** — adapters for CrewAI, LangChain, or wrap any script
+- 🚦 **Human-gated** — pause, review, and approve agent actions via an inbox
+- 🧩 **Pluggable** — plugin SDK for memory backends, tool packs, and providers
 
 ---
 
-## 3-Minute Wow Path
+## 🚀 3-Minute Wow Path
 
 Six commands, copy-paste from repo root. No API keys needed.
 
@@ -63,7 +89,7 @@ huap trace report /tmp/a.jsonl --out reports/trace.html
 
 ---
 
-## Golden Path (5 Minutes)
+## 🧭 Golden Path (5 Minutes)
 
 ### 1) Initialize a workspace
 ```bash
@@ -105,7 +131,7 @@ huap trace wrap --out traces/wrapped.jsonl -- python my_agent.py
 
 ---
 
-## Key Concepts
+## 🧩 Key Concepts
 
 | Concept | Meaning |
 |---|---|
@@ -139,7 +165,7 @@ edges:
 
 ---
 
-## CLI Reference
+## 🛠 CLI Reference
 
 ```bash
 # Workspace
@@ -203,7 +229,7 @@ huap plugins list                # List registered plugins
 
 ---
 
-## Specialist Squad (Model Router)
+## 🤖 Specialist Squad (Model Router)
 
 HUAP's model router assigns the right model to each task — local-first, cost-aware, and fully deterministic.
 
@@ -225,7 +251,7 @@ Enable with: `HUAP_ROUTER_ENABLED=1`
 
 ---
 
-## Framework Adapters
+## 🔌 Framework Adapters
 
 Keep your existing framework — HUAP makes it traceable.
 
@@ -260,7 +286,7 @@ All adapters produce standard HUAP traces compatible with replay, diff, eval, an
 
 ---
 
-## Safe Batteries
+## 🧰 Safe Batteries
 
 Two safe-by-default tools for agent workflows:
 
@@ -271,7 +297,7 @@ Two safe-by-default tools for agent workflows:
 
 ---
 
-## Human Gates & Inbox
+## 🚦 Human Gates & Inbox
 
 Agents can pause at designated **human gates** — checkpoints that require human review before the workflow continues. Pending gates land in an inbox where a human can approve, reject, or edit parameters.
 
@@ -294,7 +320,7 @@ huap watch traces/run.jsonl --only issues,gates
 
 ---
 
-## Plugins & Memory
+## 🧩 Plugins & Memory
 
 HUAP's plugin SDK lets you extend the platform without bloating core.
 
@@ -339,7 +365,7 @@ Built-in `memory_tools` (`hu_core.tools.memory_tools`) give nodes access to `ret
 
 ---
 
-## Environment Variables
+## 🔐 Environment Variables
 
 | Variable | Description | Default |
 |---|---|---|
@@ -354,7 +380,7 @@ Built-in `memory_tools` (`hu_core.tools.memory_tools`) give nodes access to `ret
 
 ---
 
-## Repository Layout
+## 🗂 Repository Layout
 
 ```
 HUAP/
@@ -396,16 +422,16 @@ HUAP/
 
 ---
 
-## Example Pods
+## 🧪 Example Pods
 
 See `examples/pods/` for reference implementations:
 
-- **hello-pod** — minimal deterministic tools (echo, add, normalize)
-- **llm-pod** — LLM integration with stub mode (summarize, classify)
-- **memory-pod** — state management patterns (get, put, list)
-- **squad_ecom** — specialist squad demo with 6 nodes (SAM, VLM, MoE, LAM, SLM, LLM)
-- **human_gate_demo** — human gate + inbox approval workflow
-- **tool_learning** — tool learning with memory retain/recall
+- 👋 **hello-pod** — minimal deterministic tools (echo, add, normalize)
+- 🧠 **llm-pod** — LLM integration with stub mode (summarize, classify)
+- 🗃️ **memory-pod** — state management patterns (get, put, list)
+- 🛒 **squad_ecom** — specialist squad demo with 6 nodes (SAM, VLM, MoE, LAM, SLM, LLM)
+- 🚦 **human_gate_demo** — human gate + inbox approval workflow
+- 🧠 **tool_learning** — tool learning with memory retain/recall
 
 ### Run the Squad Demo
 
@@ -418,14 +444,17 @@ huap trace report traces/squad_ecom.jsonl --out reports/squad_ecom.html
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 - [Getting Started](GETTING_STARTED.md) — full tutorial
 - [Conformance](CONFORMANCE.md) — interface & schema contracts
 
+> Previous guides (Concepts, Pod Authoring, Trace Guide, Contributing), the mini-book, and recipes
+> have been archived locally and are no longer shipped with the repo.
+
 ---
 
-## What's Next
+## 🗺️ What's Next
 
 Areas for future work:
 
@@ -439,20 +468,22 @@ If you want to work on one of these, open an issue with the prefix **[RFC]**, **
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 We want contributors.
 
 ### Ways to contribute
-- Bug fixes and test coverage
-- Framework adapters (CrewAI / LangChain / etc.)
-- Trace schema + compatibility tooling
-- Evaluation suites + golden baselines
-- Docs and runnable examples
+- 🐛 bug fixes and test coverage
+- 🔌 framework adapters (CrewAI / LangChain / etc.)
+- 🧾 trace schema + compatibility tooling
+- 🧪 evaluation suites + golden baselines
+- 📝 docs and runnable examples
 
 ### Dev setup
 ```bash
+# From repo root
 pip install -e packages/hu-core[dev]
+
 pytest -q
 ruff check .
 ```
@@ -464,7 +495,7 @@ ruff check .
 
 ---
 
-## License
+## 📄 License
 
 MIT — see [LICENSE](LICENSE)
 
