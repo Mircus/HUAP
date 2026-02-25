@@ -9,6 +9,7 @@
 <a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/v/huap-core?style=for-the-badge&label=PyPI&color=blue" alt="PyPI"></a>
 <a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/pyversions/huap-core?style=for-the-badge&label=Python" alt="Python"></a>
 <a href="LICENSE"><img src="https://img.shields.io/github/license/Mircus/HUAP?style=for-the-badge&color=purple" alt="License"></a>
+<a href="https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/Try_HUAP.ipynb"><img src="https://img.shields.io/badge/Try_it-Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="Open In Colab"></a>
 
 <br/>
 
