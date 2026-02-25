@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="HUAP-logo.png" alt="HUAP-Logo" width="700"/>
+  <img src="HUAP-logo.png" alt="HUAP-Logo" width="1000"/>
 </p>
 
 <div align="center">
