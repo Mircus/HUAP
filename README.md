@@ -6,7 +6,7 @@
   <br/>
   <em>Trace-first primitives for deterministic, testable agents</em>
   <br/>
-  <a href="https://github.com/Mircus/HUAP/actions/workflows/ci.yml"><img src="https://github.com/Mircus/HUAP/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/Mircus/HUAP/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Mircus/HUAP/ci.yml?branch=main&label=CI" alt="CI"></a>
 </p>
 
 **Trace-first Agent CI + Specialist Squad Orchestrator.**

@@ -1019,7 +1019,7 @@ if HAS_CLICK:
 
         # Generate diff if drift mode
         if drift:
-            baseline = repo_root / "suites" / "flagship" / "baseline.jsonl"
+            baseline = repo_root_dir / "suites" / "flagship" / "baseline.jsonl"
             if baseline.exists():
                 diff_out = out_dir / "diff.html"
                 generate_report(str(trace_out), str(diff_out), baseline_path=str(baseline))
