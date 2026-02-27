@@ -471,28 +471,14 @@ If you want to work on one of these, open an issue with the prefix **[RFC]**, **
 
 ## 🤝 Contributing
 
-We want contributors.
+We want contributors. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide — dev setup, workflow, PR guidelines, and architecture reference.
 
-### Ways to contribute
-- 🐛 bug fixes and test coverage
-- 🔌 framework adapters (CrewAI / LangChain / etc.)
-- 🧾 trace schema + compatibility tooling
-- 🧪 evaluation suites + golden baselines
-- 📝 docs and runnable examples
+Quick start:
 
-### Dev setup
 ```bash
-# From repo root
-pip install -e packages/hu-core[dev]
-
-pytest -q
-ruff check .
+pip install -e "packages/hu-core[dev]"
+pytest -q && ruff check .
 ```
-
-### PR hygiene (what makes reviews fast)
-- keep changes small and well-scoped
-- add/adjust a test or golden trace when behavior changes
-- include a short note on replay/eval impact (tokens/tool calls)
 
 ---
 
