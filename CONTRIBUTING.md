@@ -117,11 +117,19 @@ refactor: simplify condition evaluator
 
 ---
 
+## Where We Want to Grow
+
+HUAP is in public beta — the highest-impact contributions right now expand what the platform can do:
+
+- **Vector memory backends** — plug in Pinecone, Weaviate, Qdrant, ChromaDB, etc. via the `MemoryPort` interface.
+- **Coding-agent integrations** — adapters for Aider, OpenDevin, SWE-Agent, or similar.
+- **More framework adapters** — LlamaIndex, AutoGen, Semantic Kernel.
+- **Evaluation & benchmarks** — new golden suites, scoring strategies, regression baselines.
+
 ## Out of Scope
 
 - **Product verticals** — HUAP core stays domain-agnostic (no OAuth integrations, vertical-specific logic).
 - **Breaking API changes** without an accepted `[RFC]` issue.
-- **SOMA-specific code** — all vertical content was decontaminated from core; keep it that way.
 - **Large refactors** without prior discussion and maintainer buy-in.
 
 ---
