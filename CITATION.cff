@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use HUAP in your research, please cite it as below."
+title: "HUAP: HUman Agentic Platform"
+abstract: "Trace-first primitives for deterministic, testable AI agents. YAML-defined graphs, replayable JSONL traces, CI gating, and framework-agnostic adapters."
+type: software
+license: MIT
+url: "https://github.com/Mircus/HUAP"
+repository-code: "https://github.com/Mircus/HUAP"
+version: "0.1.0b1"
+date-released: "2025-01-01"
+authors:
+  - family-names: "Mirco"
+    alias: "Mircus"
+keywords:
+  - ai-agents
+  - tracing
+  - deterministic
+  - orchestration
+  - evaluation
+  - ci-cd

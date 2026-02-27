@@ -37,6 +37,24 @@ pip install huap-core
 
 ---
 
+### What HUAP is
+
+HUAP is an **open-source Python framework** that adds tracing, replay, evaluation, and CI gating to AI agent systems. You define workflows as YAML graphs, and HUAP records every action as replayable JSONL events — so your agents become deterministic, testable, and diffable. It works with any LLM framework (LangChain, CrewAI, or plain scripts).
+
+### What HUAP is *not*
+
+HUAP is not another agent framework or LLM wrapper. It doesn't replace your stack — it **instruments** it. Think of it as "CI/CD for agents."
+
+### 60-Second Quickstart
+
+```bash
+pip install huap-core
+huap demo            # generates trace.jsonl + report.html (stub mode, no API keys needed)
+huap flagship        # full 5-node pipeline: research → analyze → human gate → synthesize → memorize
+```
+
+---
+
 **Trace-first Agent CI + Specialist Squad Orchestrator.**
 
 > "Keep your framework. HUAP makes it reproducible, diffable, and CI-gated."
@@ -476,7 +494,7 @@ We want contributors. See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full gu
 Quick start:
 
 ```bash
-pip install -e "packages/hu-core[dev]"
+pip install -e "packages/hu-core[dev]" -e packages/hu-plugins-hindsight
 pytest -q && ruff check .
 ```
 

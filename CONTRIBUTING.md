@@ -10,7 +10,7 @@ Thanks for wanting to help build HUAP! Whether it's a bug fix, a new adapter, or
 # Clone and install in editable mode with dev extras
 git clone https://github.com/Mircus/HUAP.git
 cd HUAP
-pip install -e "packages/hu-core[dev]"
+pip install -e "packages/hu-core[dev]" -e packages/hu-plugins-hindsight
 
 # Verify everything works
 pytest -q                  # 96+ tests, all should pass

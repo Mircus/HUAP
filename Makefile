@@ -1,7 +1,7 @@
 .PHONY: install test lint smoke demo ci clean
 
 install:
-	pip install -e packages/hu-core[dev]
+	pip install -e packages/hu-core[dev] -e packages/hu-plugins-hindsight
 
 test:
 	pytest packages/hu-core/tests/ -q

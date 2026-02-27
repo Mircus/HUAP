@@ -4,7 +4,7 @@ HUAP Trace Spec v0.1 - Pydantic Models
 Defines the canonical trace format for replayable, eval-ready agent runs.
 Each trace is a JSONL file where each line is a TraceEvent.
 
-Spec: See PHASE_E_HAVEN_MVP.md section 3.
+Spec: See docs/manual/HUAP_Public_Beta_Manual.md (Trace Spec section).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # =============================================================================
@@ -264,8 +264,7 @@ class TraceEvent(BaseModel):
     session_id: Optional[str] = None
     data: EventData = Field(default_factory=dict)
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
     def to_jsonl(self) -> str:
         """Serialize to JSONL-compatible string."""
