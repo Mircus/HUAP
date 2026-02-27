@@ -10,6 +10,7 @@ version: "0.1.0b1"
 date-released: "2025-01-01"
 authors:
   - given-names: "Mirco"
+    family-names: "Mirco"
     alias: "Mircus"
 keywords:
   - ai-agents
