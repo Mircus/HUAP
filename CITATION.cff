@@ -9,7 +9,7 @@ repository-code: "https://github.com/Mircus/HUAP"
 version: "0.1.0b1"
 date-released: "2025-01-01"
 authors:
-  - family-names: "Mirco"
+  - given-names: "Mirco"
     alias: "Mircus"
 keywords:
   - ai-agents
