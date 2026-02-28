@@ -845,14 +845,27 @@ if HAS_CLICK:
         import asyncio
         import webbrowser
 
-        # Find the examples/graphs/hello.yaml relative to the repo
-        pkg_root = Path(__file__).resolve().parents[2]  # hu_core -> packages/hu-core
-        repo_root = pkg_root.parent.parent  # packages -> repo
-        graph_path = repo_root / "examples" / "graphs" / "hello.yaml"
+        # Look for bundled graph first (pip install), then repo root (dev install)
+        pkg_dir = Path(__file__).resolve().parent.parent
+        bundled = pkg_dir / "examples" / "hello" / "graph.yaml"
+        repo_root_dir = pkg_dir.parent.parent
+        repo_graph = repo_root_dir / "examples" / "graphs" / "hello.yaml"
+        cwd_path = Path.cwd() / "examples" / "graphs" / "hello.yaml"
 
-        if not graph_path.exists():
-            click.echo(f"Error: Could not find {graph_path}", err=True)
-            click.echo("Run this command from the HUAP repo root.", err=True)
+        graph_path = None
+        need_chdir = None
+        if bundled.exists():
+            graph_path = bundled
+        elif repo_graph.exists():
+            graph_path = repo_graph
+            need_chdir = str(repo_root_dir)
+        elif cwd_path.exists():
+            graph_path = cwd_path
+            need_chdir = str(Path.cwd())
+
+        if graph_path is None:
+            click.echo("Error: Could not find hello graph.yaml", err=True)
+            click.echo("Expected at: hu_core/examples/hello/graph.yaml", err=True)
             sys.exit(1)
 
         # Set stub mode
@@ -875,7 +888,8 @@ if HAS_CLICK:
         # Run the graph
         orig_cwd = os.getcwd()
         try:
-            os.chdir(str(repo_root))
+            if need_chdir:
+                os.chdir(need_chdir)
             from ..trace.runner import run_pod_graph
             result = asyncio.run(run_pod_graph(
                 pod="hello",

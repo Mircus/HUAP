@@ -1,0 +1,13 @@
+# Hello Demo Graph — minimal echo pipeline (bundled with package)
+
+nodes:
+  - name: echo_tool
+    run: hu_core.examples.hello.nodes.echo_tool
+  - name: echo_greet
+    run: hu_core.examples.hello.nodes.echo_greet
+
+edges:
+  - from: echo_tool
+    to: echo_greet
+  - from: echo_greet
+    to: null
