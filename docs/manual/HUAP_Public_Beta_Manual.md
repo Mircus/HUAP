@@ -110,7 +110,34 @@ Think of HUAP as the layer that turns *"agent demos"* into *"agent systems."*
 
 ---
 
-# 2) What you get (in plain words)
+# 2) Pods — what they are
+
+A **pod** is an agentic application built on top of HUAP. A pod can contain one agent, a squad of agents, or no agents at all — just orchestrated tool calls. HUAP provides the infrastructure (tracing, CI, gates, memory); the pod is your product logic.
+
+```
+┌─────────────────────────────────────────────────────┐
+│              Your Pods (agentic apps)                │
+│                                                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │ Research  │  │ Customer │  │ Code Review      │  │
+│  │ Assistant │  │ Support  │  │ Pipeline         │  │
+│  │ (1 agent) │  │(3 agents)│  │ (tools only)     │  │
+│  └──────────┘  └──────────┘  └──────────────────┘  │
+├─────────────────────────────────────────────────────┤
+│              HUAP Infrastructure                     │
+│                                                     │
+│  Trace    CI/Eval   Human Gates   Memory   Router   │
+│  (JSONL)  (suites)  (inbox)       (SQLite) (squad)  │
+└─────────────────────────────────────────────────────┘
+```
+
+Pods are **your code**. HUAP is **the platform underneath**. A pod can use any framework (CrewAI, LangChain, plain Python) — HUAP instruments it.
+
+When you run `huap trace run <pod> <graph>`, the `<pod>` is just a label for your application. The `<graph>` defines the workflow (nodes + edges). One pod can have many graphs, and each graph can orchestrate any number of agents, tools, and LLM calls.
+
+---
+
+# 3) What you get (in plain words)
 
 When you run a workflow under HUAP, you get **artifacts** you can review, share, and CI-gate:
 
@@ -126,7 +153,7 @@ When you run a workflow under HUAP, you get **artifacts** you can review, share,
 
 ---
 
-# 3) The 10-minute WOW path (do this first)
+# 4) The 10-minute WOW path (do this first)
 
 This proves the whole stack: multi-node workflow + trace + gates + memory + drift detection.
 
@@ -185,7 +212,7 @@ The first run stores findings in SQLite. The second run retrieves them. The sear
 
 ---
 
-# 4) Mental model (two pictures)
+# 5) Mental model (two pictures)
 
 ### 4.1 Runtime loop
 
@@ -229,7 +256,7 @@ The first run stores findings in SQLite. The second run retrieves them. The sear
 
 ---
 
-# 5) Adoption paths (pick one)
+# 6) Adoption paths (pick one)
 
 ### Path A — Wrap existing agents (fastest)
 
@@ -250,6 +277,53 @@ huap trace wrap --out traces/agent.jsonl -- python my_agent.py
 ```
 
 See: `examples/wrappers/langchain/` and `examples/wrappers/crewai/`
+
+#### Step-by-step: HUAPize a CrewAI app
+
+CrewAI has no public callback API, so instrumentation is manual — but straightforward:
+
+**1. Install** — `pip install huap-core` (your CrewAI code stays as-is)
+
+**2. Wrap** — import the context manager and wrap your workflow:
+
+```python
+from hu_core.adapters.crewai import huap_trace_crewai
+
+with huap_trace_crewai(out="traces/my_crew.jsonl", run_name="my_crew") as tracer:
+    # your existing CrewAI code here
+    ...
+```
+
+**3. Instrument** — call tracer methods at each step:
+
+```python
+    tracer.on_agent_step("researcher", "Search for AI frameworks")
+    tracer.on_tool_call("web_search", {"query": "AI agent frameworks 2025"})
+    result = do_search(...)
+    tracer.on_tool_result("web_search", result, duration_ms=120)
+    tracer.on_llm_request("gpt-4o", messages=[...])
+    summary = call_llm(...)
+    tracer.on_llm_response("gpt-4o", summary, usage={...}, duration_ms=800)
+```
+
+**4. View** — inspect the trace:
+
+```bash
+huap trace view traces/my_crew.jsonl
+huap trace report traces/my_crew.jsonl --out reports/my_crew.html
+```
+
+**5. Baseline + CI** — commit the trace, gate regressions:
+
+```bash
+# Save as golden baseline
+cp traces/my_crew.jsonl suites/my_crew/baseline.jsonl
+
+# In CI: run again, diff against baseline
+huap ci run suites/my_crew/suite.yaml --html reports/ci.html
+```
+
+> Try it live: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_CrewAI.ipynb)
 
 **Checklist:**
 - [ ] Wrap your run entrypoint
@@ -291,7 +365,7 @@ Wrap now; migrate critical workflows to native graphs later.
 
 ---
 
-# 6) Operating model (how teams avoid chaos)
+# 7) Operating model (how teams avoid chaos)
 
 ### Roles
 
@@ -320,7 +394,7 @@ Refresh baselines only when:
 
 ---
 
-# 7) Local memory (Hindsight) — without shooting yourself
+# 8) Local memory (Hindsight) — without shooting yourself
 
 ### What to store (good)
 
@@ -363,7 +437,7 @@ rm -rf .huap/
 
 ---
 
-# 8) CI cookbook (copy/paste mindset)
+# 9) CI cookbook (copy/paste mindset)
 
 ### Rollout cadence
 
@@ -408,7 +482,7 @@ Artifacts turn *"CI failed"* into *"CI explained why."*
 
 ---
 
-# 9) Security posture
+# 10) Security posture
 
 ### Tool risk tiers
 
@@ -436,7 +510,7 @@ HUAP ships two safe-by-default tools:
 
 ---
 
-# 10) Rollout plan
+# 11) Rollout plan
 
 ### First 2 weeks
 
@@ -462,7 +536,7 @@ HUAP ships two safe-by-default tools:
 
 ---
 
-# 11) FAQ
+# 12) FAQ
 
 **"Is this just logging?"**
 
