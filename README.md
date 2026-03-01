@@ -276,20 +276,7 @@ Enable with: `HUAP_ROUTER_ENABLED=1`
 
 Keep your existing framework — HUAP makes it traceable.
 
-**CrewAI (manual instrumentation):**
-```python
-from hu_core.adapters.crewai import huap_trace_crewai
-
-with huap_trace_crewai(out="traces/crewai.jsonl", run_name="demo") as tracer:
-    tracer.on_agent_step("researcher", "Find info about AI")
-    tracer.on_llm_request("gpt-4o", [{"role": "user", "content": "..."}])
-    tracer.on_llm_response("gpt-4o", "...", usage={"total_tokens": 50})
-    crew.kickoff()
-```
-> CrewAI has no public callback API, so events must be added manually.
-> The trace is still fully compatible with replay, diff, eval, and CI.
-
-**LangChain / LangGraph:**
+**LangChain / LangGraph (auto-instrumented):**
 ```python
 from hu_core.adapters.langchain import HuapCallbackHandler
 
@@ -297,8 +284,24 @@ handler = HuapCallbackHandler(out="traces/langchain.jsonl")
 chain.invoke({"input": "hello"}, config={"callbacks": [handler]})
 handler.flush()
 ```
+> Zero changes to your chain logic. Every LLM call, tool use, chain step, and retriever
+> query is captured automatically via LangChain's callback system.
+> [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_LangChain.ipynb)
 
-**Any script:**
+**Any Python agent (manual tracer):**
+```python
+from hu_core.adapters.crewai import huap_trace_crewai
+
+with huap_trace_crewai(out="traces/agent.jsonl", run_name="demo") as tracer:
+    tracer.on_agent_step("researcher", "Find info about AI")
+    tracer.on_llm_request("gpt-4o", [{"role": "user", "content": "..."}])
+    tracer.on_llm_response("gpt-4o", "...", usage={"total_tokens": 50})
+    # your agent code here
+```
+> Works with CrewAI, AutoGen, plain Python — any code you can call `tracer.on_*()` around.
+> [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_Agents.ipynb)
+
+**Any script (zero-code):**
 ```bash
 huap trace wrap --out traces/agent.jsonl -- python my_agent.py
 ```
