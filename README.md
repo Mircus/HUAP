@@ -10,7 +10,8 @@
 <a href="https://pypi.org/project/huap-core/"><img src="https://img.shields.io/pypi/pyversions/huap-core?style=for-the-badge&label=Python" alt="Python"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-purple?style=for-the-badge" alt="License: MIT"></a>
 <a href="https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/Try_HUAP.ipynb"><img src="https://img.shields.io/badge/Try_it-Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="Open In Colab"></a>
-<a href="https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_CrewAI.ipynb"><img src="https://img.shields.io/badge/HUAPize_CrewAI-Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="HUAPize CrewAI"></a>
+<a href="https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_Agents.ipynb"><img src="https://img.shields.io/badge/HUAPize_Agents-Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="HUAPize Agents"></a>
+<a href="https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_LangChain.ipynb"><img src="https://img.shields.io/badge/HUAPize_LangChain-Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="HUAPize LangChain"></a>
 
 <br/>
 

@@ -323,7 +323,7 @@ cp traces/my_crew.jsonl suites/my_crew/baseline.jsonl
 huap ci run suites/my_crew/suite.yaml --html reports/ci.html
 ```
 
-> Try it live: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_CrewAI.ipynb)
+> Try it live: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mircus/HUAP/blob/main/notebooks/HUAPize_Agents.ipynb)
 
 **Checklist:**
 - [ ] Wrap your run entrypoint
